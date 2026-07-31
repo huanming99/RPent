@@ -5,6 +5,9 @@ __pycache__/
 # Local run outputs.
 logs/
 
+# Downloaded model weights.
+/checkpoints/
+
 # RLinf is consumed as an external checkout, not vendored here.
 /rlinf/
 /rlinf.egg-info/
