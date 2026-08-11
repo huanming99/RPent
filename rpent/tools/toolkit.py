@@ -17,10 +17,13 @@ from functools import partial
 from typing import TYPE_CHECKING, Any, ClassVar
 
 from rpent.dashboard.events import DashboardEventSink, StepRecordEvent
+from rpent.utils.logging import get_logger
 from rpent.utils.templates import substitute
 
 if TYPE_CHECKING:
     from rpent.tools.state import EnvState, StepRecord
+
+logger = get_logger("toolkit")
 
 
 @dataclass(slots=True)
@@ -120,6 +123,14 @@ class ToolResult:
         return blocks
 
 
+@dataclass(frozen=True, slots=True)
+class RunFinalization:
+    """Environment-neutral result derived after planner execution."""
+
+    final_result: dict[str, Any] | None
+    error: str | None = None
+
+
 class Toolkit:
     """Base toolkit: registers common tools and dispatches tool calls.
 
@@ -198,19 +209,35 @@ class Toolkit:
         """Dispatch a tool call to its registered handler."""
         entry = self._tools.get(name)
         if entry is None:
-            return ToolResult(name=name, result={"error": f"unknown tool: {name}"})
+            return self._complete_tool_call(
+                ToolResult(name=name, result={"error": f"unknown tool: {name}"})
+            )
         _, handler = entry
 
         with self._operation_lock:
             if self._active_operation is not None:
-                return ToolResult(
-                    name=name,
-                    result={"error": "another tool operation is still active"},
+                return self._complete_tool_call(
+                    ToolResult(
+                        name=name,
+                        result={"error": "another tool operation is still active"},
+                    )
                 )
             operation = _ToolOperation()
             self._active_operation = operation
 
         try:
+            try:
+                blocked = self.before_execute_tool(name, input_dict)
+            except Exception as error:  # noqa: BLE001
+                blocked = {
+                    "error": f"tool precondition failed: {error}",
+                    "traceback": traceback.format_exc(),
+                }
+            if blocked is not None:
+                return self._complete_tool_call(
+                    ToolResult(name=name, result=blocked)
+                )
+
             started = time.perf_counter()
             failed = False
             try:
@@ -259,11 +286,39 @@ class Toolkit:
                 if record is not None:
                     self._publish_step(record)
 
-            return ToolResult(name=name, result=result)
+            return self._complete_tool_call(ToolResult(name=name, result=result))
         finally:
             with self._operation_lock:
                 self._active_operation = None
                 operation.done_event.set()
+
+    def _complete_tool_call(self, result: ToolResult) -> ToolResult:
+        """Notify the environment of a completed dispatch and return its result."""
+        try:
+            self.on_tool_event(result.name, result)
+        except Exception as error:  # noqa: BLE001
+            logger.exception("tool event observer failed for %s: %s", result.name, error)
+        return result
+
+    def before_execute_tool(
+        self,
+        name: str,
+        input_dict: dict[str, Any],
+    ) -> dict[str, Any] | None:
+        """Reject a tool call before its handler runs. Default: allow it."""
+        return None
+
+    def on_tool_event(self, name: str, result: ToolResult) -> None:
+        """Observe a completed tool call without changing environment state."""
+
+    def finalize_run(
+        self,
+        *,
+        planner_result: dict[str, Any] | None,
+        planner_error: str | None,
+    ) -> RunFinalization:
+        """Aggregate facts from an already-finished planner run."""
+        return RunFinalization(final_result=planner_result)
 
     def _publish_step(self, record: StepRecord) -> None:
         """Publish one recorded environment step to the dashboard sink."""
