@@ -38,8 +38,20 @@ Hosting
 env's subtree from the dataset on each run (incremental: only changed files are
 downloaded), so the local copy stays up to date. The dataset is public, so a
 fresh clone downloads it without a token. Set ``HF_HUB_OFFLINE=1`` to skip the
-sync and use the local copy only. Memory is optional: if an env has none on the
-dataset, or the sync fails, the run continues with whatever is on disk.
+sync and use the local copy only, but only after that environment's subtree has
+already been downloaded. For example, prepare RoboTwin resources with:
+
+.. code-block:: bash
+
+   hf download RLinf/RPent-memory \
+     --repo-type dataset \
+     --include "robotwin/**" \
+     --local-dir /path/to/RPent/resources
+
+Do not set ``HF_HUB_OFFLINE=1`` merely because model checkpoints are already
+local: it disables the memory sync as well. Memory is optional, so if an env has
+none on the dataset, the sync fails, or an offline local copy is missing, the run
+continues. RPent logs a warning when no local resources are available.
 
 Updating the memory
 -------------------

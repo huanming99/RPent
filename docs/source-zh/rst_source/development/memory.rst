@@ -28,8 +28,19 @@ memory 笔记里的技巧、参数范围和失败模式。
 ``resources/`` 不随 git 仓库分发，而是托管在 Hugging Face 数据集 ``RLinf/RPent-memory``
 上（按环境分层，例如 ``libero/memory/`` 与 ``libero/results_*_pert/``）。``rpent.utils.resources.ensure_resources``
 会在每次运行时从数据集增量同步该环境的子目录（只下载有变化的文件），使本地副本保持最新。
-数据集是公开的，无需 token 即可下载；设 ``HF_HUB_OFFLINE=1`` 则跳过同步、仅使用本地副本。
-memory 是可选的：若某环境在数据集上没有 memory，或同步失败，运行也会用本地已有的内容继续。
+数据集是公开的，无需 token 即可下载。只有已经预下载对应环境子目录时，才能设置
+``HF_HUB_OFFLINE=1`` 跳过同步并仅使用本地副本。例如可先准备 RoboTwin resources：
+
+.. code-block:: bash
+
+   hf download RLinf/RPent-memory \
+     --repo-type dataset \
+     --include "robotwin/**" \
+     --local-dir /path/to/RPent/resources
+
+不要仅仅因为模型 checkpoint 已在本地就设置 ``HF_HUB_OFFLINE=1``，因为它也会禁用
+memory 同步。memory 是可选的：若数据集没有对应内容、同步失败或离线副本缺失，运行仍会
+继续；本地完全没有对应资源时，RPent 会输出明确警告。
 
 更新 memory
 -----------

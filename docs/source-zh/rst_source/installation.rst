@@ -6,8 +6,10 @@ RPent 可以通过一条 ``pip install`` 命令完成安装，并提供多种可
 准备工作
 --------
 
-- Linux + NVIDIA GPU (LIBERO 通过 EGL 渲染)。
-- 与显卡匹配的 CUDA 12.x 驱动。
+- Linux + NVIDIA GPU（LIBERO 和 RoboTwin 通过 EGL 渲染）。
+- 与显卡匹配的 CUDA 12.x 驱动。RoboTwin 还需要匹配的 CUDA toolkit/NVCC、
+  编译工具链，以及 headless renderer 和 native extension 使用的
+  GL/EGL/Vulkan 开发库。
 - Python 3.10–3.12 (见 ``pyproject.toml`` 中的 ``requires-python``)。
 - ``git``、``bash``、以及能编译 MuJoCo / robosuite 的 C 工具链。
 
@@ -48,8 +50,19 @@ LIBERO-PRO 仿真器、SAM 3.0 和 RLinf 运行时。
      - 仅 openpi VLA
    * - ``.[rlinf]``
      - 仅 RLinf 运行时
+   * - ``.[robotwin]``
+     - RLinf typed 环境 API、package 化的 RoboTwin Python runtime 和固定的
+       LingBot inference runtime
    * - ``.[sam3]``
      - 仅 SAM 3.0
+
+``.[robotwin]`` 会安装受支持的完整 Python runtime，不再要求运行 RLinf 统一
+安装器或单独 clone RoboTwin。大型 RoboTwin assets 和 LingBot checkpoint 仍是
+外部资源，按 :doc:`usage/robotwin` 中的命令单独准备。
+
+在三个 runtime distributions 完成正式发布前，这个 extra 会像 RoboCasa
+integration 的过渡方案一样，通过不可变 Git commit 固定公开 packaging
+branches。
 
 2. 下载运行 LIBERO 所需的仿真资源
 ------------------------------------------------
