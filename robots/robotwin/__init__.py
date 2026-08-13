@@ -99,7 +99,7 @@ def _add_cli_args(parser: argparse.ArgumentParser, use_dashboard: bool) -> None:
     parser.add_argument("--env-endpoint", default=None)
     parser.add_argument("--vla-endpoint", default=None)
     parser.add_argument(
-        "--lingbot-model-path",
+        "--vla-model-path",
         default=os.environ.get("LINGBOT_MODEL_PATH"),
         help=("LingBot checkpoint. Defaults to LINGBOT_MODEL_PATH when set."),
     )
@@ -237,10 +237,10 @@ def _resolve_env_runtime_path(args: argparse.Namespace) -> Path | None:
 def _resolve_vla_runtime_path(args: argparse.Namespace) -> Path | None:
     model_path: Path | None = None
     if args.vla_endpoint is None:
-        configured_model = getattr(args, "lingbot_model_path", None)
+        configured_model = getattr(args, "vla_model_path", None)
         if not configured_model:
             raise ValueError(
-                "--lingbot-model-path is required when launching the local VLA "
+                "--vla-model-path is required when launching the local VLA "
                 "server; set LINGBOT_MODEL_PATH or pass the option explicitly"
             )
         model_path = Path(configured_model).expanduser().resolve()
