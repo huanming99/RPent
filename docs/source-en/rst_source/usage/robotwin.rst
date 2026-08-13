@@ -1,21 +1,15 @@
 RoboTwin
 ========
 
-RPent uses RLinf's ``RoboTwinEnv`` as the sole owner of the RoboTwin native
-task. The RPent process only talks to the environment through a thin RPC
-bridge:
-
-.. code-block:: text
-
-   RPent Toolkit -> RPent EnvServer -> RLinf RoboTwinEnv
-   -> RoboTwin VectorEnv/SubEnv -> native task
+RPent runs RoboTwin through RLinf's ``RoboTwinEnv`` and uses LingBot-VLA to
+generate end-effector actions. Install the Python packages first, then download
+the simulator assets and model checkpoint separately.
 
 Installation
 ------------
 
-Create a Python 3.11 environment and install the RoboTwin extra. The extra
-combines the generic RLinf bridge, the packaged RoboTwin runtime, and the
-pinned LingBot inference runtime:
+Use Python 3.11, which is the version covered by the full runtime validation.
+Create an environment and install the RoboTwin dependency set:
 
 .. code-block:: bash
 
@@ -24,38 +18,41 @@ pinned LingBot inference runtime:
    source .venv/bin/activate
    uv pip install -e ".[robotwin]"
 
-During the pre-release transition, ``.[robotwin]`` resolves the RLinf bridge,
-RoboTwin runtime, and LingBot runtime from public repositories at immutable Git
-commits. Users still install them through the single command above; the pins
-will be replaced by normal version requirements after the distributions are
-released.
+This command installs RPent's RLinf integration, the RoboTwin Python runtime,
+and the LingBot inference package. You do not need to run the RLinf installer
+or clone RoboTwin separately.
 
-The distributions selected by ``.[robotwin]`` own the Python dependency
-contract. ``rlinf-robotwin-runtime`` contains the supported RoboTwin Python
-runtime, task modules, and small configuration/description resources, but not
-the large simulator assets. ``rlinf-lingbotvla`` contains the LingBot inference
-runtime but not a checkpoint. Installation never edits SAPIEN or MPLib files
-in ``site-packages``. The runtime distribution pins SAPIEN 3.0.0b1 to match
-the RoboTwin and LingBot inference contract.
+The large RoboTwin assets and LingBot checkpoint are not included. During the
+current pre-release period, the Python packages are installed from immutable
+Git revisions; they will use released version requirements after publication.
 
-The RoboTwin runtime wheel includes the pinned cuRobo v0.7.8 Python package,
-content files, and CUDA extensions built against Torch 2.8. Users do not clone
-or compile cuRobo during the RPent install.
+RoboTwin requires Linux with an NVIDIA GPU, a working compiler toolchain,
+CUDA/NVCC compatible with Torch 2.8, and the GL/EGL/Vulkan libraries needed by
+SAPIEN. The installation builds the bundled cuRobo v0.7.8 CUDA extensions on
+the local machine. Users do not need to download or configure cuRobo
+separately, but NVCC and the compiler toolchain must be available.
 
-Before installing, provide the OS-level prerequisites that Python packaging
-cannot supply: a Linux compiler/build toolchain, CUDA/NVCC compatible with the
-installed PyTorch build, and the GL/EGL/Vulkan libraries needed for headless
-SAPIEN rendering. The old RLinf installer is not part of the RPent user flow.
+The supported runtime pins SAPIEN 3.0.0b1. Keep this version when updating or
+recreating the environment; a different SAPIEN version can change simulator
+observations and model behavior.
 
-Download the pinned RoboTwin assets into a relocatable directory:
+Download assets
+---------------
+
+Download the supported RoboTwin asset snapshot and set its location:
 
 .. code-block:: bash
 
-   rlinf-robotwin-download-assets --output /path/to/robotwin-assets
+   robotwin-download-assets --output /path/to/robotwin-assets
    export ROBOTWIN_ASSETS_ROOT=/path/to/robotwin-assets
 
-Download the pinned LingBot checkpoint and keep its path in the shell
-environment, as with the model path used by the RoboCasa integration:
+The downloader validates existing files and skips the download when the
+requested snapshot is already complete.
+
+Download the model
+------------------
+
+Download the LingBot checkpoint and set its location:
 
 .. code-block:: bash
 
@@ -64,14 +61,15 @@ environment, as with the model path used by the RoboCasa integration:
       --local-dir /path/to/LingBot-VLA-RoboTwin-EEF-ckpt1500
    export LINGBOT_MODEL_PATH=/path/to/LingBot-VLA-RoboTwin-EEF-ckpt1500
 
-The model snapshot contains
+The checkpoint contains the default
 ``configs/robot_configs/robotwin_eef.yaml``. Use
-``--lingbot-robot-config`` only to override that checkpoint-relative default.
+``--lingbot-robot-config`` only when a different robot configuration is
+required.
 
-Run
----
+Run a task
+----------
 
-Launch one hybrid episode from the activated environment:
+Run one episode from the activated environment:
 
 .. code-block:: bash
 
@@ -85,113 +83,54 @@ Launch one hybrid episode from the activated environment:
       --model gpt-5.5
 
 ``--task-config`` defaults to ``demo_randomized`` and ``--seed`` defaults to
-``100002``. A minimal invocation is therefore:
+``100002``. The shortest equivalent command is:
 
 .. code-block:: bash
 
    rpent --env robotwin --task-name beat_block_hammer
 
-RoboTwin runs use strict exact-seed acceptance. RLinf delegates reset to the
-native ``VectorEnv`` lifecycle, then verifies the actual native episode seed.
-If RoboTwin silently advances to another seed, the Agent episode remains
-invalid and the run fails instead of using the replacement episode.
-
-``--env-endpoint`` and ``--vla-endpoint`` attach to existing
-services. RPent requires the EnvServer metadata to match the requested
-task, task config, exact seed, API version, and action layouts. It also
-requires the LingBot server's initial WebSocket metadata to identify the
-RoboTwin EEF16 policy, observation layout, camera order, and chunk length.
-Mismatched external services fail before episode reset or action execution.
-``--cuda-device`` keeps the legacy same-GPU behavior. Do not combine it with
-``--env-cuda-device`` or ``--vla-cuda-device``. The latter two options allow
-the environment and VLA server to run on different GPUs.
-
-Like the LIBERO and RoboCasa integrations, locally spawned Env and VLA servers
-use ``sys.executable``. LingBot, cuRobo, and RLinf are imported from that Python
-environment. RPent does not scan sibling directories or write hidden runtime
-configuration. ``RPENT_RLINF_ROOT`` and ``RLINF_REPO_PATH`` are explicit
-development-only overrides; normal runs should leave both unset. EnvServer logs
-the resolved ``rlinf.__file__``, ``robotwin.__file__``, runtime distribution
-versions, and asset snapshot identity at startup. It rejects modules outside
-the active environment and installations that lack the typed RoboTwin Agent
-API.
-
-The LingBot VLA is Session-owned: its checkpoint is loaded once and the same
-server is reused across TaskRuns. Each TaskRun owns a fresh RoboTwin EnvServer,
-which is stopped before the shared VLA during teardown. Episode initialization
-explicitly resets the shared model history before calling
-``reset_exact(seed)`` on the new environment. The model client never resets the
-environment implicitly, so the two lifecycle owners remain independent.
-
-RoboTwin supports the generic RPent Dashboard with ``--dashboard``. The
-LingBot VLA is shared for the Dashboard Session, while each ``/rpent-task
-<task_name> <task_config> <seed>`` command starts a fresh exact-seed EnvServer.
-The live monitor displays the head, left-wrist, and right-wrist camera frames.
-Task replacement interrupts an active primitive at its next safe boundary;
-an in-flight native action batch completes before the task-owned EnvServer is
-stopped.
-
-Path overrides
+Common options
 --------------
 
-``ROBOTWIN_ASSETS_ROOT`` selects the downloaded simulator assets and
-``LINGBOT_MODEL_PATH`` selects the checkpoint. Their equivalent CLI overrides
-are ``--robotwin-assets-root`` and ``--lingbot-model-path``.
-``--lingbot-robot-config`` overrides the config contained in the model
-snapshot. RoboTwin, LingBot, and cuRobo source paths are not RPent runtime
-arguments; they belong to the active Python environment installed by
-``.[robotwin]``.
+- ``--robotwin-assets-root`` overrides ``ROBOTWIN_ASSETS_ROOT``.
+- ``--vla-model-path`` overrides ``LINGBOT_MODEL_PATH``.
+- ``--env-cuda-device`` and ``--vla-cuda-device`` place the simulator and VLA
+  on different GPUs. Use ``--cuda-device`` instead when both should use the
+  same GPU; do not combine these forms.
+- ``--env-endpoint`` and ``--vla-endpoint`` connect to services that are
+  already running. RPent checks that they match the requested task, seed, and
+  model interface before executing actions.
+- ``--dashboard`` starts the RPent Dashboard. Submit tasks with
+  ``/rpent-task <task_name> <task_config> <seed>``; the Dashboard displays the
+  head and wrist camera views while the task runs.
 
-When RPent launches the LingBot server, it checks that the files required by
-the configured model are present and enables a parent-death watcher.
+Do not use ``--env-endpoint`` with ``--dashboard`` because each Dashboard task
+starts its own environment service.
 
-RPent also syncs the ``robotwin/`` subtree from the public
-``RLinf/RPent-memory`` dataset into ``resources/robotwin/``. The Planner can
-read curated memory and successful task references from that directory, but
-cannot write to it or access files outside it. Historical recipes are technique
-priors only; all geometry must be recomputed from the current episode.
-For offline runs, download that subtree first as described in
-:doc:`../development/memory`; otherwise ``HF_HUB_OFFLINE=1`` leaves the Planner
-without RoboTwin memory or reference JSON/JSONL files.
+Seeds and results
+-----------------
 
-Environment API
----------------
+RPent requires RoboTwin to reset to the exact requested seed. If the simulator
+selects a different episode, the run stops instead of continuing with that
+episode.
 
-RPent directly uses RLinf's agent-facing RoboTwin environment APIs. RLinf's
-existing training ``chunk_step()`` path remains unchanged. These APIs include:
-``execute_action_chunk()``, ``apply_qpos_updates()``,
-``capture_observation()``, ``get_robot_state()``,
-``get_episode_status()``, and ``plan_arm_path()``. Startup uses
-``reset_exact()`` to verify the requested seed. Native
-action layouts are ``qpos14`` and world-frame ``eef16`` with ``wxyz``
-quaternions. Robot state distinguishes action-compatible ``qpos_target14``
-from measured arm-only ``arm_qpos_real12``. Observation capture returns images,
-geometry, calibration, robot state, and task language from one lock-protected
-capture. Episode status includes native task state and agent validity. Action
-results do not fabricate RL rewards, terminations, or truncations.
+Action tools report whether all requested steps were completed and why they
+stopped. Completion of an action or VLA chunk does not by itself mean that the
+task succeeded.
 
-State-changing RPCs are single-attempt operations. Any exception, including a
-server exception with a traceback, or any response without an explicit valid
-``episode_status`` fail-closes the client. RPent classifies the run as a runtime
-failure and stops all further requests that depend on that episode; it does not
-replay or recover an action whose mutation cannot be ruled out. RLinf also
-invalidates the episode when native EEF16 or qpos14 execution raises after a
-partial action sequence, and preserves the requested and executed action counts
-on the original exception.
+A successful RPent result requires RoboTwin's own success check to pass and the
+Planner to call ``finish()`` exactly once. When an action may have executed only
+partially before an error, RPent stops the episode rather than retrying it.
 
-All state-changing primitives return ``completed``, ``requested_steps``,
-``executed_steps``, and one of ``completed``, ``native_success``,
-``budget_exhausted``, or ``runtime_failure`` in ``stop_reason``. The retained
-``success`` field reports compatibility-level primitive handling only; it is
-not the RoboTwin task-success predicate. For planned motion, ``substeps=0``
-executes the full path, ``substeps=1`` executes its final waypoint, and larger
-values sample a path that includes both endpoints.
+Memory and offline runs
+-----------------------
 
-Task success requires both a valid Agent episode and fresh native
-``TASK_ENV.eval_success``. Completion of a VLA chunk or primitive does not imply
-task success. Accepted success also requires the Planner to call ``finish()``
-exactly once.
+RPent downloads optional RoboTwin task references from the public
+``RLinf/RPent-memory`` dataset. These references contain prior techniques, not
+coordinates to replay; the Planner must calculate geometry again from the
+current observation.
 
-The fixed LingBot model contract is defined by the frozen
-``RoboTwinModelSpec`` in ``robots/robotwin/spec.py``. It contains only the
-runtime paths and feature-layout values needed by the EEF policy.
+Set ``HF_HUB_OFFLINE=1`` to skip this synchronization. The run still starts
+when no local references are available, but RPent logs a warning and continues
+without them. To retain the references offline, download them before the run as
+described in :doc:`../development/memory`.

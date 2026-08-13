@@ -11,7 +11,8 @@ Prerequisites
 - CUDA 12.x drivers matching your GPU. RoboTwin also requires a matching CUDA
   toolkit/NVCC, compiler toolchain, and the GL/EGL/Vulkan development libraries
   used by its headless renderer and native extensions.
-- Python 3.10–3.12 (see ``pyproject.toml``'s ``requires-python``).
+- Python 3.10–3.12 (see ``pyproject.toml``'s ``requires-python``). For RoboTwin,
+  use Python 3.11, which is the version covered by the full runtime validation.
 - ``git``, ``bash``, and a working C toolchain for MuJoCo / robosuite.
 
 You will also want:
@@ -53,8 +54,7 @@ Available extras:
    * - ``.[rlinf]``
      - RLinf runtime only
    * - ``.[robotwin]``
-     - RLinf's typed environment API, the packaged RoboTwin Python runtime, and
-       the pinned LingBot inference runtime
+     - RoboTwin simulation and LingBot inference dependencies
    * - ``.[sam3]``
      - SAM 3.0 only
 
@@ -63,9 +63,9 @@ require running RLinf's unified installer or cloning RoboTwin. The large
 RoboTwin assets and LingBot checkpoint remain external resources and are
 prepared with the commands in :doc:`usage/robotwin`.
 
-Until the three runtime distributions complete their release process, this
-extra pins their public packaging branches by immutable Git commit, following
-the same transitional packaging model used by the RoboCasa integration.
+During the pre-release period, this extra uses immutable Git revisions for its
+runtime packages. These will be replaced by released version requirements once
+the packages are published.
 
 2. Download the assets required to run LIBERO
 ---------------------------------------------
