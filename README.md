@@ -156,6 +156,12 @@ rpent --env libero --dashboard --dashboard-language zh-cn \
   --planner claude_code --model claude-opus-4-8
 ```
 
+### RoboTwin
+
+RoboTwin has its own installation and run guide. See the
+[RoboTwin documentation](https://rpent.readthedocs.io/en/latest/rst_source/usage/robotwin.html)
+for the complete setup and first-run workflow.
+
 For more detailed documentation, see the [RPent documentation](https://rpent.readthedocs.io/en/latest/).
 
 ## Key CLI Options

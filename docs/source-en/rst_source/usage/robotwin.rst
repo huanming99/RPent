@@ -1,9 +1,10 @@
 RoboTwin
 ========
 
-RPent runs RoboTwin through RLinf's ``RoboTwinEnv`` and uses LingBot-VLA to
-generate end-effector actions. Install the Python packages first, then download
-the simulator assets and model checkpoint separately.
+`RoboTwin <https://robotwin-platform.github.io/>`_ is a simulation benchmark
+for dual-arm robot manipulation, with a range of tabletop tasks and randomized
+scenes. RPent runs RoboTwin through RLinf and uses LingBot-VLA to generate robot
+actions.
 
 Installation
 ------------
@@ -18,9 +19,7 @@ Create an environment and install the RoboTwin dependency set:
    source .venv/bin/activate
    uv pip install -e ".[robotwin]"
 
-This installs all required Python dependencies. You do not need to run the
-RLinf installer or clone RoboTwin separately. The simulator assets and LingBot
-checkpoint are downloaded in the next steps.
+You do not need to run the RLinf installer or clone RoboTwin separately.
 
 Before installing, prepare Linux with an NVIDIA GPU, CUDA/NVCC compatible with
 Torch 2.8, a working compiler toolchain, and the GL/EGL/Vulkan libraries needed
@@ -105,3 +104,8 @@ Common options
 For planner setup, external service endpoints, and offline resources, see
 :doc:`configure_planner`, :doc:`advanced_deployment`, and
 :doc:`../development/memory`.
+
+Before each run, RPent automatically syncs optional RoboTwin memory and task
+references from the public ``RLinf/RPent-memory`` dataset. These references can
+improve planning by providing previously verified techniques; the run still
+starts if they are unavailable.

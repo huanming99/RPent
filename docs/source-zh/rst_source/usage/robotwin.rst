@@ -1,8 +1,9 @@
 RoboTwin
 ========
 
-RPent 通过 RLinf 的 ``RoboTwinEnv`` 运行 RoboTwin，并使用 LingBot-VLA 生成
-末端执行器动作。请先安装 Python 依赖，再分别下载仿真资源和模型文件。
+`RoboTwin <https://robotwin-platform.github.io/>`_ 是一个面向双臂机器人操作的
+仿真基准，包含多种桌面操作任务和随机化场景。RPent 通过 RLinf 运行 RoboTwin，
+并使用 LingBot-VLA 生成机器人动作。
 
 安装
 ----
@@ -17,8 +18,7 @@ RPent 通过 RLinf 的 ``RoboTwinEnv`` 运行 RoboTwin，并使用 LingBot-VLA �
    source .venv/bin/activate
    uv pip install -e ".[robotwin]"
 
-这条命令会安装所需的 Python 依赖。用户不需要运行 RLinf 安装器，也不需要
-单独克隆 RoboTwin。仿真资源和 LingBot 模型将在后续步骤中下载。
+用户不需要运行 RLinf 安装器，也不需要单独克隆 RoboTwin。
 
 安装前请准备 Linux、NVIDIA GPU、与 Torch 2.8 匹配的 CUDA/NVCC、可用的
 编译工具链，以及 SAPIEN 所需的 GL/EGL/Vulkan 库。首次安装会在本机编译
@@ -100,3 +100,7 @@ Dashboard 启动后，访问地址会显示在终端中。
 
 规划器配置、外部服务和离线参考资料的说明分别见 :doc:`configure_planner`、
 :doc:`advanced_deployment` 和 :doc:`../development/memory`。
+
+每次运行前，RPent 会自动从公开数据集 ``RLinf/RPent-memory`` 同步可选的 RoboTwin
+经验和任务参考。这些内容包含经过验证的操作方法，可以帮助规划器提高任务表现；
+即使无法下载，任务仍可正常启动。
