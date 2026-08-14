@@ -20,14 +20,10 @@ RoboTwin
 
 用户不需要运行 RLinf 安装器，也不需要单独克隆 RoboTwin。
 
-安装前请准备 Linux、NVIDIA GPU、与 Torch 2.8 匹配的 CUDA/NVCC、可用的
-编译工具链，以及 SAPIEN 所需的 GL/EGL/Vulkan 库。首次安装会在本机编译
-cuRobo，因此可能需要一些时间。
+.. note::
 
-.. warning::
-
-   ``.[robotwin]`` 已固定 SAPIEN 3.0.0b1，请勿手动升级。其他版本可能改变
-   仿真观测，导致模型效果下降。
+   ``.[robotwin]`` 使用 SAPIEN 3.0.0b1。其他版本可能改变仿真观测，导致模型
+   效果下降。
 
 下载仿真资源
 ------------

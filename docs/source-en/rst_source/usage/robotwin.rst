@@ -21,15 +21,10 @@ Create an environment and install the RoboTwin dependency set:
 
 You do not need to run the RLinf installer or clone RoboTwin separately.
 
-Before installing, prepare Linux with an NVIDIA GPU, CUDA/NVCC compatible with
-Torch 2.8, a working compiler toolchain, and the GL/EGL/Vulkan libraries needed
-by SAPIEN. The first installation may take some time because it compiles cuRobo
-locally.
+.. note::
 
-.. warning::
-
-   ``.[robotwin]`` pins SAPIEN 3.0.0b1. Do not upgrade it manually: a different
-   version can change simulator observations and reduce model performance.
+   ``.[robotwin]`` uses SAPIEN 3.0.0b1. Other versions can change simulator
+   observations and reduce model performance.
 
 Download assets
 ---------------
