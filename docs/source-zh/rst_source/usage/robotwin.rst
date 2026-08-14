@@ -17,19 +17,17 @@ RPent 通过 RLinf 的 ``RoboTwinEnv`` 运行 RoboTwin，并使用 LingBot-VLA �
    source .venv/bin/activate
    uv pip install -e ".[robotwin]"
 
-这条命令会安装 RPent 的 RLinf 集成、RoboTwin Python 运行环境和 LingBot 推理组件。
-用户不需要运行 RLinf 安装器，也不需要单独克隆 RoboTwin。
+这条命令会安装所需的 Python 依赖。用户不需要运行 RLinf 安装器，也不需要
+单独克隆 RoboTwin。仿真资源和 LingBot 模型将在后续步骤中下载。
 
-大型 RoboTwin 仿真资源和 LingBot 模型不包含在 Python 包中，需要另外下载。正式
-版本发布前，这些 Python 包暂时固定到相应 Git 仓库的特定提交；发布后将改用版本号依赖。
+安装前请准备 Linux、NVIDIA GPU、与 Torch 2.8 匹配的 CUDA/NVCC、可用的
+编译工具链，以及 SAPIEN 所需的 GL/EGL/Vulkan 库。首次安装会在本机编译
+cuRobo，因此可能需要一些时间。
 
-RoboTwin 需要 Linux、NVIDIA GPU、可用的编译工具链、与 Torch 2.8 匹配的
-CUDA/NVCC，以及 SAPIEN 所需的 GL/EGL/Vulkan 库。安装过程会在本机编译随包
-提供的 cuRobo v0.7.8 CUDA 扩展。用户无需单独下载或配置 cuRobo，但必须提前
-准备好 NVCC 和编译工具链。
+.. warning::
 
-当前支持的运行环境固定使用 SAPIEN 3.0.0b1。更新或重建环境时请保留这一版本；
-更换 SAPIEN 版本可能改变仿真观测，进而影响模型表现。
+   ``.[robotwin]`` 已固定 SAPIEN 3.0.0b1，请勿手动升级。其他版本可能改变
+   仿真观测，导致模型效果下降。
 
 下载仿真资源
 ------------
@@ -41,7 +39,8 @@ CUDA/NVCC，以及 SAPIEN 所需的 GL/EGL/Vulkan 库。安装过程会在本机
    robotwin-download-assets --output /path/to/robotwin-assets
    export ROBOTWIN_ASSETS_ROOT=/path/to/robotwin-assets
 
-下载工具会先校验已有文件；如果指定版本的资源已经完整，则不会重复下载。
+下载工具会先校验已有文件；如果目标目录中的 RoboTwin 资源已经完整，
+则不会重复下载。
 
 下载模型
 --------
@@ -55,9 +54,7 @@ CUDA/NVCC，以及 SAPIEN 所需的 GL/EGL/Vulkan 库。安装过程会在本机
       --local-dir /path/to/LingBot-VLA-RoboTwin-EEF-ckpt1500
    export LINGBOT_MODEL_PATH=/path/to/LingBot-VLA-RoboTwin-EEF-ckpt1500
 
-模型目录中已经包含默认配置
-``configs/robot_configs/robotwin_eef.yaml``。只有需要使用其他机器人配置时，
-才需要传入 ``--lingbot-robot-config``。
+模型目录中已经包含 RoboTwin 的默认机器人配置。
 
 运行任务
 --------
@@ -70,53 +67,36 @@ CUDA/NVCC，以及 SAPIEN 所需的 GL/EGL/Vulkan 库。安装过程会在本机
       --task-name beat_block_hammer \
       --task-config demo_randomized \
       --seed 100000 \
-      --env-cuda-device 0 \
-      --vla-cuda-device 2 \
       --planner codex \
       --model gpt-5.5
 
-``--task-config`` 默认使用 ``demo_randomized``，``--seed`` 默认使用
-``100002``，因此最简命令是：
+修改 ``--task-name`` 可以选择其他任务，修改 ``--seed`` 可以使用其他随机种子。
+完整参数请运行 ``rpent --env robotwin --help`` 查看。
 
-.. code-block:: bash
+查看运行结果
+------------
 
-   rpent --env robotwin --task-name beat_block_hammer
+终端会显示服务启动信息、规划器输出和工具调用。默认情况下，运行结果保存在
+``logs/<timestamp>_robotwin_<task-name>_s<seed>/``。排查或复核运行结果时，
+可以先查看以下文件：
+
+- ``run.log``：RPent 主进程日志。
+- ``robotwin_env_server.log`` 和 ``lingbot_vla_server.log``：仿真环境与模型
+  服务的启动和报错信息。
+- ``transcript_*.json``：规划器对话和最终回复。
+- ``robotwin_episode_result.json``：RoboTwin 的最终运行结果。
+
+添加 ``--dashboard`` 可以在浏览器中查看规划器输出以及头部和腕部相机画面。
+Dashboard 启动后，访问地址会显示在终端中。
 
 常用参数
 --------
 
 - ``--robotwin-assets-root``：覆盖 ``ROBOTWIN_ASSETS_ROOT`` 指定的资源目录。
 - ``--vla-model-path``：覆盖 ``LINGBOT_MODEL_PATH`` 指定的模型目录。
+- ``--cuda-device``：让仿真环境和 VLA 使用同一张 GPU。
 - ``--env-cuda-device`` 和 ``--vla-cuda-device``：让仿真环境和 VLA 使用不同
-  GPU。如果二者使用同一张 GPU，可以改用 ``--cuda-device``；两种写法不能混用。
-- ``--env-endpoint`` 和 ``--vla-endpoint``：连接已经启动的环境或 VLA 服务。
-  执行动作前，RPent 会检查服务是否与当前任务、种子和模型接口匹配。
-- ``--dashboard``：启动 RPent Dashboard。通过
-  ``/rpent-task <task_name> <task_config> <seed>`` 提交任务；运行期间可以查看头部
-  和腕部相机画面。
+  GPU。这两个参数不能与 ``--cuda-device`` 同时使用。
 
-``--dashboard`` 不能与 ``--env-endpoint`` 同时使用，因为 Dashboard 会为每个任务
-启动独立的环境服务。
-
-种子与成功判定
---------------
-
-RPent 要求 RoboTwin 必须重置到用户指定的种子。如果仿真器实际选择了其他回合，
-RPent 会终止本次运行，而不会继续使用被替换的回合。
-
-动作工具会返回是否完成全部请求步骤，以及停止原因。单次动作或 VLA
-动作序列执行完成，并不代表任务已经成功。
-
-RPent 最终判定任务成功需要同时满足两个条件：RoboTwin 自身的成功判定通过，
-并且规划器恰好调用一次 ``finish()``。如果动作报错前可能已经执行了一部分，RPent 会终止当前
-回合，不会自动重试。
-
-任务参考与离线运行
-------------------
-
-RPent 会从公开数据集 ``RLinf/RPent-memory`` 下载可选的 RoboTwin 任务参考。这些
-内容只提供操作思路，不能直接复用其中的历史坐标；规划器仍需根据当前观测重新计算位置。
-
-设置 ``HF_HUB_OFFLINE=1`` 可以跳过同步。即使本地没有任务参考，运行仍会继续，
-但 RPent 会给出警告并在没有参考内容的情况下执行。若希望离线时继续使用这些参考，
-请先按 :doc:`../development/memory` 中的说明下载。
+规划器配置、外部服务和离线参考资料的说明分别见 :doc:`configure_planner`、
+:doc:`advanced_deployment` 和 :doc:`../development/memory`。

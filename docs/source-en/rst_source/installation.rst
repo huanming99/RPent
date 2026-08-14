@@ -63,9 +63,9 @@ require running RLinf's unified installer or cloning RoboTwin. The large
 RoboTwin assets and LingBot checkpoint remain external resources and are
 prepared with the commands in :doc:`usage/robotwin`.
 
-During the pre-release period, this extra uses immutable Git revisions for its
-runtime packages. These will be replaced by released version requirements once
-the packages are published.
+During the pre-release period, this extra installs several dependencies from
+fixed Git commits, so the installation needs access to GitHub. These will be
+replaced by released package versions after publication.
 
 2. Download the assets required to run LIBERO
 ---------------------------------------------

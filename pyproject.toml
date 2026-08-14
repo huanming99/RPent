@@ -70,6 +70,7 @@ libero-plus = [
 ]
 robotwin = [
     # TODO: replace fixed owner-controlled revisions with released versions.
+    "huggingface-hub[cli]>=0.34,<1.0",
     "rlinf @ git+https://github.com/RLinf/RLinf.git@55cdc0e0ea578a066d42d94aaeb0298c24da0150",
     "rlinf-robotwin-runtime @ git+https://github.com/RoboTwin-Platform/RoboTwin.git@11d2d4ba1ba4819ebf63bb91ba0c5dfd4b0f81f2",
     "rlinf-lingbotvla @ git+https://github.com/RLinf/lingbot-vla.git@031c0cee003f154a09d4f9da91e7e27b108cceb9",

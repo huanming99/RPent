@@ -339,9 +339,8 @@ def dump_observation(
         "view_specs": view_specs,
         "log": log,
     }
-    # EnvState is an Agent observation trace. Native success and budget facts
-    # remain in episode_status; this layer must not fabricate RoboTwin's RL
-    # terminated/truncated tuple.
+    # Success and budget remain in episode_status; an observation does not
+    # create training termination signals.
     with env_state.record_step(
         state=state,
         terminated=False,

@@ -1,5 +1,5 @@
 # Copyright 2026 RPent Contributors
-"""RPC client for RLinf's agent-facing RoboTwin environment APIs."""
+"""RPC client for one RLinf RoboTwin environment."""
 
 from __future__ import annotations
 
@@ -30,9 +30,7 @@ class RoboTwinEnvClient:
     def __init__(self, client: RpcClient, *, expected_meta: dict[str, Any]):
         self._client = client
         self._fatal_error: RoboTwinExecutionError | None = None
-        server_meta = self._client.call(
-            "env.get_env_meta", timeout_s=READ_TIMEOUT_S
-        )
+        server_meta = self._client.call("env.get_env_meta", timeout_s=READ_TIMEOUT_S)
         if server_meta != expected_meta:
             raise RuntimeError(
                 "RoboTwin env metadata mismatch: "

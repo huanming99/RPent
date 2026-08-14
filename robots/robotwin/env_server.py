@@ -26,8 +26,7 @@ from typing import Any, Literal
 
 import numpy as np
 
-# Direct script launch matches LIBERO/RoboCasa while keeping ``robots`` out of
-# the wheel. Make the checkout root available before importing RPent modules.
+# Support direct execution from an RPent checkout before package imports.
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -73,7 +72,7 @@ _RUNTIME_DISTRIBUTIONS = (
 
 
 def _distribution_versions() -> dict[str, str]:
-    """Return installed versions for the package-first runtime stack."""
+    """Return installed versions for the RoboTwin dependencies."""
     result = {}
     for distribution in _RUNTIME_DISTRIBUTIONS:
         try:
@@ -95,7 +94,7 @@ def _require_active_environment(module_name: str, module_file: str) -> Path:
 
 
 def _validate_rlinf_runtime() -> None:
-    """Fail early when the imported RLinf lacks the typed RoboTwin API."""
+    """Require the RoboTwin methods used by RPent."""
     missing = [
         name
         for name in _REQUIRED_ROBOTWIN_CAPABILITIES
@@ -150,7 +149,7 @@ def _to_numpy_tree(value: Any) -> Any:
 
 
 class RoboTwinEnvFacade(RpcFacade):
-    """Expose RLinf's agent-facing RoboTwin environment APIs over RPC."""
+    """Expose one RLinf RoboTwin environment over RPC."""
 
     def __init__(self, env: RoboTwinEnv, *, metadata: dict[str, Any]):
         super().__init__()

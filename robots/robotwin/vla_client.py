@@ -48,7 +48,7 @@ class LingBotVLAClient:
         self._get_policy().reset()
 
     def infer(self, observation: dict[str, Any]) -> np.ndarray:
-        """Infer one eef16 chunk without changing the native environment."""
+        """Infer one eef16 action chunk."""
         views = observation["views"]
         state = observation["robot_state"]
         left_pose = np.asarray(state["left_eef_pose"], dtype=np.float32)

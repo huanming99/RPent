@@ -361,7 +361,7 @@ def _init_runtime(
         for daemon in reversed(shared_daemons):
             daemon.stop()
         raise
-    # Cleanup order is task Env first, then Session VLA.
+    # Stop the task environment before the shared VLA.
     return [*task_daemons, *shared_daemons], {**task_kwargs, **shared_kwargs}
 
 

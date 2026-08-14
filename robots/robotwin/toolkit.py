@@ -1,5 +1,5 @@
 # Copyright 2026 RPent Contributors
-"""RPent toolkit for RLinf's agent-facing RoboTwin environment APIs."""
+"""RPent tools for the RLinf RoboTwin environment."""
 
 from __future__ import annotations
 
@@ -206,7 +206,6 @@ class RoboTwinToolkit(Toolkit):
             return dict(self._runtime_failure)
 
     def on_tool_event(self, name: str, result: ToolResult) -> None:
-        """Observe tool execution without owning correctness-critical state."""
         del name, result
 
     @property

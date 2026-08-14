@@ -28,7 +28,7 @@ def _qmult(left: np.ndarray, right: np.ndarray) -> np.ndarray:
 
 
 class RoboTwinPrimitives:
-    """Compose agent-facing operations from RLinf environment APIs."""
+    """Compose RoboTwin operations from the RLinf environment API."""
 
     def __init__(
         self,

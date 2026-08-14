@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Thin launcher for the official LingBot-VLA WebSocket server."""
+"""Launcher for the official LingBot-VLA WebSocket server."""
 
 from __future__ import annotations
 
@@ -22,8 +22,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-# Direct script launch matches LIBERO/RoboCasa while keeping ``robots`` out of
-# the wheel. Make the checkout root available before absolute imports.
+# Support direct execution from an RPent checkout before package imports.
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -55,7 +54,7 @@ def _parent_watch_callback(
     *,
     exit_fn=os._exit,
 ):
-    """Build the owned-launcher callback used when the parent reaches EOF."""
+    """Return the callback used when the parent closes stdin."""
 
     def _on_parent_death() -> None:
         print("parent_watch_triggered=true", flush=True)
@@ -92,10 +91,8 @@ def main() -> None:
         raise FileNotFoundError(f"LingBot robot config not found: {robot_config}")
 
     if args.parent_watch:
-        # The official WebsocketPolicyServer does not expose a stable
-        # shutdown/close API.  This launcher is the owned process, so exiting
-        # it on parent death releases its socket and CUDA context without
-        # introducing a second server process or changing the official runtime.
+        # The upstream server has no shutdown API. Ending this process when its
+        # parent exits releases the socket and CUDA context.
         watch_parent_death(_parent_watch_callback())
 
     from deploy.lingbot_vla_policy import LingbotVLAServer
