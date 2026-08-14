@@ -61,7 +61,6 @@ RoboTwin
 
    rpent --env robotwin \
       --task-name beat_block_hammer \
-      --task-config demo_randomized \
       --seed 100000 \
       --planner codex \
       --model gpt-5.5
@@ -88,6 +87,8 @@ Dashboard 启动后，访问地址会显示在终端中。
 常用参数
 --------
 
+- ``--task-config``：选择 RoboTwin 环境配置，支持 ``demo_clean`` 和
+  ``demo_randomized``，默认使用 ``demo_randomized``。
 - ``--robotwin-assets-root``：覆盖 ``ROBOTWIN_ASSETS_ROOT`` 指定的资源目录。
 - ``--vla-model-path``：覆盖 ``LINGBOT_MODEL_PATH`` 指定的模型目录。
 - ``--cuda-device``：让仿真环境和 VLA 使用同一张 GPU。

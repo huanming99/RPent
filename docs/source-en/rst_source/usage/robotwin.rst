@@ -62,7 +62,6 @@ Run one episode from the activated environment:
 
    rpent --env robotwin \
       --task-name beat_block_hammer \
-      --task-config demo_randomized \
       --seed 100000 \
       --planner codex \
       --model gpt-5.5
@@ -90,6 +89,9 @@ a browser. The command prints the Dashboard URL after startup.
 Common options
 --------------
 
+- ``--task-config`` selects the RoboTwin environment configuration. Supported
+  values are ``demo_clean`` and ``demo_randomized``; the default is
+  ``demo_randomized``.
 - ``--robotwin-assets-root`` overrides ``ROBOTWIN_ASSETS_ROOT``.
 - ``--vla-model-path`` overrides ``LINGBOT_MODEL_PATH``.
 - ``--cuda-device`` runs the simulator and VLA on the same GPU.
