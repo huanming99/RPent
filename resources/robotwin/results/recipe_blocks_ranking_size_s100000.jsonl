@@ -1,7 +1,0 @@
-{"action":"lingbot_act","chunks":2,"use_length":50,"prompt":"Center large block, medium block, small block with the left arm, the right arm, and the left arm following size order."}
-{"action":"lingbot_act","chunks":3,"use_length":50,"prompt":"Center large block, medium block, small block with the left arm, the right arm, and the left arm following size order."}
-{"action":"lingbot_act","chunks":3,"use_length":50,"prompt":"Center large block, medium block, small block with the left arm, the right arm, and the left arm following size order."}
-{"action":"move_to","arm":"left","xyz":[-0.103,-0.064,1.04],"quat":null,"gripper":1,"substeps":25}
-{"action":"lingbot_act","chunks":3,"use_length":50,"prompt":"Center large block, medium block, small block with the left arm, the right arm, and the left arm following size order."}
-{"action":"lingbot_act","chunks":3,"use_length":50,"prompt":"Center large block, medium block, small block with the left arm, the right arm, and the left arm following size order."}
-{"action":"lingbot_act","chunks":3,"use_length":50,"prompt":"Center large block, medium block, small block with the left arm, the right arm, and the left arm following size order."}
