@@ -1,0 +1,33 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_shake_bottle_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "arm": "right",
+        "goal": "Grasp the bottle with the right arm and shake it.",
+        "name": "right_arm_shake",
+        "verify": "Bottle moves with the right gripper during the shake."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Right arm holds the bottle before shaking.",
+      "Bottle remains controlled through the shake."
+    ],
+    "roles": {
+      "arm": "right",
+      "manipulated": "bottle with white cap",
+      "target_motion": "shake while grasped"
+    }
+  },
+  "task_language": "Grasp the bottle with white cap with the right arm and shake it.",
+  "task_name": "shake_bottle",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates."
+}

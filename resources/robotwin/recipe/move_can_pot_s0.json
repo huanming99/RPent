@@ -1,0 +1,43 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_move_can_pot_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Bind the requested can, pot, and any explicit arm from the current task language, then grasp the can without moving the pot.",
+        "name": "bind_and_grasp_can",
+        "verify": "The requested can visibly follows the gripper while the pot remains a stable landmark."
+      },
+      {
+        "goal": "Set the can on the task-consistent side beside the pot, aligned with the pot and stably supported by the table.",
+        "name": "place_can_beside_pot",
+        "verify": "The can is released beside the pot on the intended side, rests in a stable horizontal pose, and both grippers are open and clear."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is one historical clean command sequence. In a new episode, current task language and current observations are authoritative."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Bind can, pot, intended side, and any explicit arm from the current complete task language and current scene.",
+      "The can, not the pot, must visibly move with the gripper before transport.",
+      "Keep the can controlled until table support is established beside the pot, then verify stable orientation and both grippers clear."
+    ],
+    "roles": {
+      "manipulated": "the can named by the current task language",
+      "relation": "the can rests beside the pot on the task-consistent side and is aligned with it",
+      "target_landmark": "the pot named by the current task language"
+    }
+  },
+  "task_language": "Grab the medium sauce can, shift it, and place it close to the rounded pot with curved handles",
+  "task_name": "move_can_pot",
+  "vla_recipe": "Historical action structure: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=2,use_length=50). In every new episode, each lingbot_act must use the current episode's complete task_language exactly; rebind the can, pot, arm, and relative side from current observations; do not replay historical poses.",
+  "what_failed": {
+    "notes": [
+      "Avoid transporting after an ambiguous close or treating arbitrary proximity as completion; verify the current can moves with the gripper and is stably supported on the intended side before retreat."
+    ]
+  }
+}

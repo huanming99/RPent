@@ -1,0 +1,42 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_place_object_basket_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Put the toycar into the handheld basket.",
+        "name": "place_toycar_in_basket",
+        "verify": "Toycar is inside the basket."
+      },
+      {
+        "goal": "Grab or lift the basket while keeping toycar contained.",
+        "name": "grasp_basket",
+        "verify": "Basket is controlled and toycar remains inside."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Toycar is placed into the basket first.",
+      "Basket is grasped only after toycar is contained."
+    ],
+    "roles": {
+      "manipulated": "toycar and handheld basket",
+      "protected": "toycar remains inside during basket lift",
+      "target_relation": "toycar inside basket, then basket grasped"
+    }
+  },
+  "task_language": "Place the toycar with dark gray windows in the handheld basket, then grab the handheld basket.",
+  "task_name": "place_object_basket",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=3,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid grasping the basket before containment; verify the toycar is inside and remains contained while the basket is lifted."
+    ]
+  }
+}

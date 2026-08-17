@@ -1,0 +1,48 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_place_object_scale_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Pick up the blue bell without pressing or dragging the scale.",
+        "name": "grasp_blue_bell",
+        "verify": "Bell moves with the gripper."
+      },
+      {
+        "goal": "Carry the held bell above the electronicscale.",
+        "name": "transport_over_scale",
+        "verify": "Bell is controlled above the scale support area."
+      },
+      {
+        "goal": "Lower and release the bell onto the scale.",
+        "name": "release_on_scale",
+        "verify": "Bell rests on the scale after release."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Bell is held before transport.",
+      "Bell remains over the scale during lower.",
+      "Release leaves the bell supported on the scale."
+    ],
+    "roles": {
+      "manipulated": "smooth blue bell",
+      "protected": "scale remains clear and stable",
+      "target_support": "electronicscale with silver buttons"
+    }
+  },
+  "task_language": "Pick the smooth blue bell and carefully move it to the electronicscale with silver buttons",
+  "task_name": "place_object_scale",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=1,use_length=50); 2:lingbot_act(chunks=1,use_length=50); 3:move_to(arm=left,gripper=open,orientation=specified); 4:lingbot_act(chunks=1,use_length=50); 5:move_to(arm=left,gripper=closed,orientation=keep); 6:move_to(arm=left,gripper=closed,orientation=keep); 7:move_to(arm=left,gripper=closed,orientation=keep); 8:move_to(arm=left,gripper=closed,orientation=keep); 9:release(arm=left). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid moving toward the scale with an empty gripper; verify the blue bell lifts, stays over the scale, and remains supported after release."
+    ]
+  }
+}

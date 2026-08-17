@@ -1,0 +1,46 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_place_a2b_left_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "arm": "left",
+        "goal": "Use the left arm to grasp the soap.",
+        "name": "grasp_soap_left_arm",
+        "verify": "Soap moves with the left gripper."
+      },
+      {
+        "arm": "left",
+        "goal": "Transport and release the soap to the left of the toycar.",
+        "name": "place_left_of_toycar",
+        "verify": "Soap is stably left of the toycar after release."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Soap is the moved object; toycar is the reference.",
+      "Soap remains held before left-side placement.",
+      "Release preserves the left-of-toycar relation."
+    ],
+    "roles": {
+      "arm": "left",
+      "manipulated": "dark brown hand-sized soap",
+      "reference": "bright sleek toycar",
+      "target_relation": "soap left of toycar"
+    }
+  },
+  "task_language": "Using the left arm, move the dark brown hand-sized soap left of the bright sleek toycar.",
+  "task_name": "place_a2b_left",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:move_to(arm=left,gripper=closed,orientation=keep); 3:move_to(arm=left,gripper=closed,orientation=keep); 4:release(arm=left). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid high transport after a close alone; verify the soap moves with the left gripper before placing it stably left of the toycar."
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{"action":"lingbot_act","chunks":2,"use_length":50,"prompt":"Use your left arm to pick the basic mug in solid white, rotate it, set it down, and hang it onto the dark gray rack."}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Use your left arm to pick the basic mug in solid white, rotate it, set it down, and hang it onto the dark gray rack."}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Use your left arm to pick the basic mug in solid white, rotate it, set it down, and hang it onto the dark gray rack."}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Use your left arm to pick the basic mug in solid white, rotate it, set it down, and hang it onto the dark gray rack."}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Use your left arm to pick the basic mug in solid white, rotate it, set it down, and hang it onto the dark gray rack."}
+{"action":"render"}
+{"action":"rotate_wrist","arm":"right","delta_yaw_deg":15.0,"gripper":null,"substeps":25}
+{"action":"rotate_wrist","arm":"right","delta_yaw_deg":15.0,"gripper":null,"substeps":25}
+{"action":"move_to","arm":"right","xyz":[-0.0071714758,-0.1420808882,1.0027645826],"quat":[0.37756228,-0.06417833,0.38487208,0.83976267],"gripper":null,"substeps":25}
+{"action":"move_to","arm":"right","xyz":[-0.0106716761,-0.1451763958,1.0013397932],"quat":[0.3455561,0.1596076,0.62679583,0.67988483],"gripper":null,"substeps":25}
+{"action":"move_to","arm":"right","xyz":[0.07626053,-0.11083869,0.97860816],"quat":[0.3422098,0.15611666,0.62823292,0.68106052],"gripper":null,"substeps":25}
+{"action":"move_to","arm":"right","xyz":[0.16217852,-0.0756058,0.95695402],"quat":[0.3422098,0.15611666,0.62823292,0.68106052],"gripper":null,"substeps":25}
+{"action":"move_to","arm":"right","xyz":[0.24775814,-0.03943616,0.93646981],"quat":[0.3422098,0.15611666,0.62823292,0.68106052],"gripper":null,"substeps":25}
+{"action":"move_to","arm":"right","xyz":[0.27187523,-0.02975582,0.9307481],"quat":[0.3422098,0.15611666,0.62823292,0.68106052],"gripper":null,"substeps":25}
+{"action":"move_to","arm":"right","xyz":[0.30147555,-0.01317644,0.88595516],"quat":[0.3422098,0.15611666,0.62823292,0.68106052],"gripper":null,"substeps":25}
+{"action":"move_to","arm":"right","xyz":[0.32691177,0.0010706,0.84746359],"quat":[0.3422098,0.15611666,0.62823292,0.68106052],"gripper":null,"substeps":25}
+{"action":"release","arm":"right"}

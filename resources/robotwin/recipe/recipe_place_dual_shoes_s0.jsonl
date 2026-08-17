@@ -1,0 +1,3 @@
+{"action":"lingbot_act","chunks":2,"use_length":50,"prompt":"Transfer two the white shoe with rounded toe, tips left-aligned, into the smooth bright orange box."}
+{"action":"lingbot_act","chunks":3,"use_length":50,"prompt":"Transfer two the white shoe with rounded toe, tips left-aligned, into the smooth bright orange box."}
+{"action":"move_to","arm":"right","xyz":[-0.013439473696053028,-0.10525114834308624,0.98],"quat":null,"gripper":1,"substeps":25}

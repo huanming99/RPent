@@ -1,0 +1,117 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_hanging_mug_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Before robot motion, identify the elevated open endpoint T and base-side point B of the continuous protruding rack bar, set u=normalize(B-T), reject the table and support post, and freeze the episode-local rack geometry.",
+        "name": "bind_static_rack",
+        "verify": "T is the free bar endpoint, B and distributed samples lie on the same protruding member, the fitted bar is distinct from the table and vertical post, and a second ordinary camera is consistent when usable."
+      },
+      {
+        "arm": "task-language source arm followed by right receiving arm",
+        "goal": "Use exact current task-language VLA for pickup, required rotation, stable staging, and receiving-arm acquisition.",
+        "name": "learned_pick_rotate_and_handoff",
+        "verify": "The mug is elevated and visibly moves coherently with the closed right receiving gripper; closure or proximity alone is insufficient."
+      },
+      {
+        "arm": "right",
+        "goal": "Stop VLA permanently after the verified right hold, expose the handle only with bounded visibility probes, fit a valid full 6-D held-handle frame T_WH, and lock T_EH=inverse(T_WE)@T_WH from the achieved right EE pose.",
+        "name": "bind_held_handle",
+        "verify": "A FULL_LOOP fit or every CONSTRAINED_PARTIAL numeric gate passes; T_WH, achieved T_WE, and T_EH are recorded once and later handle vision is not used to rebind."
+      },
+      {
+        "arm": "right",
+        "goal": "While clear of the rack, rotate about the latest achieved EE origin so the propagated handle-plane normal aligns to the nearer signed rack axis, then freeze the achieved normalized right EE quaternion as q_transport.",
+        "name": "align_and_lock_orientation",
+        "verify": "The propagated handle normal satisfies abs(dot(n_pred,u))>=0.95 and every later analytic move explicitly commands q_transport."
+      },
+      {
+        "arm": "right",
+        "goal": "Use the frozen rack anchor, locked T_EH, and each newly achieved EE pose to move the predicted handle center toward C_pre=T-d_pre*u in analytic segments no longer than 0.100 m.",
+        "name": "achieved_state_transport_to_pre_tip",
+        "verify": "The final segment reaches the computed collision-clear PRE-TIP relation without crossing T, while the propagated handle error remains within the current clearance budget."
+      },
+      {
+        "arm": "right",
+        "goal": "From achieved PRE-TIP, execute one deterministic translation along +u to the computed tip-crossing relation and one deterministic translation farther along +u to the observed-scale interior seating relation.",
+        "name": "cross_tip_and_seat",
+        "verify": "Achieved-state propagation places the aperture across the frozen tip and then on an interior bar segment clear of the support post, with maintained hold and budgeted pose error."
+      },
+      {
+        "arm": "right",
+        "goal": "Release only after the propagated seating relation passes; then use ordinary observations and the official evaluator to verify rack support.",
+        "name": "release_and_verify",
+        "verify": "The mug remains supported by the rack after gripper-object separation and the latest ordinary state or final result reports eval_success=true."
+      }
+    ],
+    "relation_to_jsonl": "The phases and gates are the transferable policy. The companion JSONL is a historical successful trace; its literal poses, motion count, task language, and timing are provenance and must not be replayed in a new episode."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Re-localize the mug, rack bar, table, current mug-instance handle center/plane/aperture radius, current EE poses, visibility, reachability, and collision context from matching current ordinary RGB/world maps. Never reuse the companion JSONL's xyz, quaternion, pixels, table height, object dimensions, or target relations.",
+    "default_policy_when_preconditions_match": "Use the source-success VLA-to-Primitive split and terminal state machine as the same-task default when current task semantics and observation gates match. Supported status gives this task-specific split priority over the generic full-VLA fallback; every current-scene perception, hold, binding, clearance, and execution gate still must pass.",
+    "vla_primitive_boundary": {
+      "before_boundary": "Use exact current task-language VLA for source pickup, rotation, staging, and receiving grasp. The opening call may use chunks=2 only in a safely open scene; use chunks=1 near contact and handoff. Permit at most three progressive short receiving continuations while coupling remains recoverable.",
+      "boundary_gate": "Enter Primitive-only control only when ordinary observations verify the elevated mug moving coherently with the closed right receiving gripper.",
+      "after_boundary": "No later VLA call is allowed. Use primitives for handle visibility, binding, alignment, transport, crossing, seating, release, and verification."
+    },
+    "rack_binding": {
+      "axis_definition": "T is the elevated free open endpoint, B is on the same bar toward its support, and u=normalize(B-T).",
+      "freeze_rule": "Bind and audit the static rack before the first robot action, then never replace it with a later mug/gripper-occluded estimate.",
+      "pre_tip_rule": "Derive C_pre=T-d_pre*u and crossing/seating offsets from the currently observed bar length, bar radius, handle aperture, and collision clearance."
+    },
+    "handle_binding": {
+      "preferred_mode": "FULL_LOOP",
+      "authorized_fallback": "CONSTRAINED_PARTIAL",
+      "constrained_partial_gates": [
+        "Use one matching RGB/world-map pair with at least 24 finite inner-rim samples on one continuous visible arc spanning at least 60 degrees.",
+        "Require a robust handle-plane fit with maximum retained inlier distance no greater than 0.0035 m after rejecting mug body, table, gripper, and background points.",
+        "Fit the aperture radius as a free episode-local parameter from the current mug instance and require median circle radial residual no greater than 0.0035 m; do not import a clean-instance radius interval.",
+        "Two disjoint visible-arc half fits may shift the center by at most 0.005 m, change the plane normal by at most 8 degrees, and change the fitted radius by at most max(0.005 m, 0.15*r_aperture).",
+        "The inferred center must lie inside the visible handle topology rather than on the mug body, gripper, or a shadow."
+      ],
+      "visibility_probe_budget": "Before binding and while safely clear, use at most two observation-conditioned wrist rotations of at most 15 degrees and at most two free-space translations of at most 0.030 m; preserve the hold and undo a worsening probe.",
+      "instance_scale_rule": "Estimate r_aperture from the current held mug and r_bar from the current rack. Reject a non-finite, non-positive, short-arc-degenerate, topology-inconsistent, or split-unstable estimate; never substitute dimensions from the source trace.",
+      "lock_rule": "Compute T_EH=inverse(T_WE_achieved)@T_WH once. After lock, do not change the grasp, visually re-fit the handle, or require terminal handle visibility."
+    },
+    "orientation_and_transport": {
+      "alignment": "Choose n_goal as the closer of +u and -u. Rotate at the latest achieved EE xyz; for a rotation above 35 degrees or one direct planning failure, use at most one SLERP halfway pose before the final pose.",
+      "pose_conversion": "For each desired handle pose, compute the EE target through the locked T_EH. Freeze the achieved alignment quaternion as q_transport and explicitly command it on every later move_to; gripper remains unchanged.",
+      "far_transport": "Move toward current C_pre in segments no longer than 0.100 m with at least 25 substeps, recomputing from the achieved full EE pose after every completed move.",
+      "terminal_transport": "From achieved PRE-TIP, issue one computed crossing move and one computed seating move along +u, each with at least 25 substeps and q_transport. Do not replace them with repeated visual millimeter servoing."
+    },
+    "execution_gate": {
+      "clearance_budget": "Derive the operational handle-center error budget as min(0.015 m, 0.60*(r_aperture-r_bar)).",
+      "required_audit": "After every move, compare commanded and achieved EE translation and quaternion, propagate T_WH_pred=T_WE_achieved@T_EH, and use handle-position error rather than EE xyz error alone to decide phase advancement.",
+      "undershoot_policy": "Safe positive progress with endpoint undershoot is retained and the next target is recomputed from the achieved state. A short correction need not be repeated when the propagated handle is already inside the clearance budget and orientation error remains budgeted."
+    },
+    "critical_gates": [
+      "The initial rack fit identifies the free protruding bar rather than the table, base, shadow, or vertical post.",
+      "The right receiving hold is mechanically verified before Primitive-only motion.",
+      "A complete 6-D FULL_LOOP or numerically valid CONSTRAINED_PARTIAL handle fit is locked before rackward transport.",
+      "The propagated handle normal is aligned to the signed rack axis and the achieved quaternion is explicitly preserved.",
+      "PRE-TIP, crossing, seating, and release each require achieved-state propagated handle error inside the current physical clearance budget.",
+      "Official success, not primitive completion or visual proximity, is the terminal truth."
+    ],
+    "roles": {
+      "manipulated": "the mug identified by the current complete task language",
+      "source_arm": "the source arm required by the current task language",
+      "receiving_arm": "right arm in the supported source strategy, subject to matching current embodiment and observation",
+      "target": "the free open endpoint and interior segment of the currently observed rack bar"
+    }
+  },
+  "task_language": "Use your left arm to pick the basic mug in solid white, rotate it, set it down, and hang it onto the dark gray rack.",
+  "task_name": "hanging_mug",
+  "vla_recipe": "Historical winning structure: five exact-language VLA calls established the source manipulation and verified elevated right hold; after that boundary the trace used render, bounded wrist visibility rotations, in-place quaternion alignment, three coarse achieved-state-replanned transports, PRE-TIP, tip crossing, seating, and right release. In a new episode the VLA call count is observation-conditioned, every VLA prompt uses the complete current task_language, and every analytic pose is rederived from current geometry rather than copied from the companion JSONL.",
+  "what_failed": {
+    "notes": [
+      "A verified right hold can still fail the full 6-D held-handle binding gate; never convert an invalid fit into blind rackward motion.",
+      "A full-loop-only visibility rule discarded useful held states. Use CONSTRAINED_PARTIAL only when every listed numeric and topology gate passes.",
+      "Unspecified transport orientation previously amplified small EE endpoint residuals through the handle-to-EE lever. Explicitly command the achieved q_transport on every post-alignment move.",
+      "Terminal self-occlusion is expected after a valid lock. Propagate T_EH from achieved EE states instead of visually rebinding the occluded handle."
+    ]
+  }
+}

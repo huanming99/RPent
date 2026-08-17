@@ -1,0 +1,15 @@
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Move red block, green block, and blue block to the center using the left arm, the right arm, the left arm, and stack them with blue block on top."}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Move red block, green block, and blue block to the center using the left arm, the right arm, the left arm, and stack them with blue block on top."}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Move red block, green block, and blue block to the center using the left arm, the right arm, the left arm, and stack them with blue block on top."}
+{"action":"move_to","arm":"left","xyz":[-0.2,-0.27,1.05],"quat":null,"gripper":1,"substeps":25}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Move red block, green block, and blue block to the center using the left arm, the right arm, the left arm, and stack them with blue block on top."}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Move red block, green block, and blue block to the center using the left arm, the right arm, the left arm, and stack them with blue block on top."}
+{"action":"move_to","arm":"right","xyz":[-0.019,-0.118,1.03],"quat":null,"gripper":0,"substeps":25}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Move red block, green block, and blue block to the center using the left arm, the right arm, the left arm, and stack them with blue block on top."}
+{"action":"move_to","arm":"right","xyz":[-0.027,-0.126,1.105],"quat":null,"gripper":1,"substeps":25}
+{"action":"move_to","arm":"right","xyz":[0.04,-0.2,1.03],"quat":null,"gripper":1,"substeps":25}
+{"action":"move_to","arm":"right","xyz":[0.17,-0.29,1.03],"quat":null,"gripper":1,"substeps":25}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Move red block, green block, and blue block to the center using the left arm, the right arm, the left arm, and stack them with blue block on top."}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Move red block, green block, and blue block to the center using the left arm, the right arm, the left arm, and stack them with blue block on top."}
+{"action":"move_to","arm":"left","xyz":[-0.024,-0.141,1.045],"quat":null,"gripper":0,"substeps":25}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Move red block, green block, and blue block to the center using the left arm, the right arm, the left arm, and stack them with blue block on top."}

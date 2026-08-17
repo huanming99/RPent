@@ -1,0 +1,44 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_stamp_seal_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "arm": "right",
+        "goal": "Use the right arm to pick up the carved seal.",
+        "name": "grasp_seal",
+        "verify": "Seal moves with the right gripper."
+      },
+      {
+        "arm": "right",
+        "goal": "Press the seal onto the brown target area.",
+        "name": "stamp_brown_target",
+        "verify": "Seal face contacts the brown target."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Right arm controls the seal before stamping.",
+      "Seal face contacts the brown target squarely."
+    ],
+    "roles": {
+      "arm": "right",
+      "manipulated": "hand-sized carved seal",
+      "target": "brown target area"
+    }
+  },
+  "task_language": "Use the right arm to pick the hand-sized carved seal for Brown",
+  "task_name": "stamp_seal",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=1,use_length=50); 2:lingbot_act(chunks=1,use_length=50); 3:lingbot_act(chunks=1,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid treating near-target placement as a stamp; verify the right gripper keeps the seal face centered and square against the brown target."
+    ]
+  }
+}

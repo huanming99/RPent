@@ -173,6 +173,12 @@ def _build_argparser() -> argparse.ArgumentParser:
                          "Terminal interactive API/Claude sessions are exempt. "
                          "Defaults to CODEX_TIMEOUT_S (codex only), "
                          "CELL_TIMEOUT_S, or 1200.")
+    ap.add_argument(
+        "--reasoning-effort",
+        choices=["none", "minimal", "low", "medium", "high", "xhigh"],
+        default=None,
+        help="Reasoning effort for the Codex planner.",
+    )
     ap.add_argument("--claude-code-max-budget-usd", type=float, default=None,
                     help="Budget passed to claude -p --max-budget-usd. "
                          "Defaults to MAX_BUDGET_USD env or 10.")
@@ -236,6 +242,7 @@ def main() -> int:
         env_name=env_name,
         base_url=args.base_url,
         model=args.model,
+        reasoning_effort=args.reasoning_effort,
         max_tokens=args.max_tokens,
         planner_timeout_s=args.planner_timeout_s,
         claude_code_max_budget_usd=args.claude_code_max_budget_usd,

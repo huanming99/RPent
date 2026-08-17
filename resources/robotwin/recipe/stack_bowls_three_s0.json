@@ -1,0 +1,48 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_stack_bowls_three_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Stabilize the largest bowl as the bottom support.",
+        "name": "set_largest_bowl",
+        "verify": "Largest bowl is upright and stable."
+      },
+      {
+        "goal": "Place the middle bowl on or in the largest bowl.",
+        "name": "place_middle_bowl",
+        "verify": "Two-bowl stack is stable."
+      },
+      {
+        "goal": "Place the smallest bowl on the two-bowl stack.",
+        "name": "place_smallest_bowl",
+        "verify": "Three bowls are stacked largest to smallest."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Largest bowl is the support first.",
+      "Middle bowl is placed on the largest.",
+      "Smallest bowl is placed last on the stack."
+    ],
+    "roles": {
+      "manipulated_order": "largest bowl bottom, middle bowl, smallest bowl top",
+      "protected": "lower bowls remain stable while upper bowl is placed",
+      "target_stack": "bowls nested or stacked largest to smallest"
+    }
+  },
+  "task_language": "Position the glazed bowl with curved sides one on top of the other largest to smallest.",
+  "task_name": "stack_bowls_three",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=3,use_length=50); 2:lingbot_act(chunks=3,use_length=50); 3:lingbot_act(chunks=3,use_length=50); 4:release(arm=right). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid releasing a tilted bowl onto the stack; verify each held bowl is upright and centered while preserving the larger bowls below it."
+    ]
+  }
+}

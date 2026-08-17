@@ -1,0 +1,9 @@
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Pick the smooth blue bell and carefully move it to the electronicscale with silver buttons"}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Pick the smooth blue bell and carefully move it to the electronicscale with silver buttons"}
+{"action":"move_to","arm":"left","xyz":[-0.032,-0.161,1.0],"quat":[0.7071,0,0.7071,0],"gripper":1,"substeps":25}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Pick the smooth blue bell and carefully move it to the electronicscale with silver buttons"}
+{"action":"move_to","arm":"left","xyz":[-0.038,-0.138,1.03],"quat":null,"gripper":0,"substeps":25}
+{"action":"move_to","arm":"left","xyz":[-0.12,0.03,1.03],"quat":null,"gripper":0,"substeps":25}
+{"action":"move_to","arm":"left","xyz":[-0.127,0.031,0.97],"quat":null,"gripper":0,"substeps":25}
+{"action":"move_to","arm":"left","xyz":[-0.134,0.034,0.945],"quat":null,"gripper":0,"substeps":25}
+{"action":"release","arm":"left"}

@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import socket
 import sys
@@ -83,6 +84,11 @@ def _add_cli_args(parser: argparse.ArgumentParser, use_dashboard: bool) -> None:
     parser.add_argument("--task-name", required=required)
     parser.add_argument("--seed", type=int, default=100002)
     parser.add_argument(
+        "--task-language-file",
+        default=None,
+        help="Evaluation seed JSON containing the exact instruction for this task/seed.",
+    )
+    parser.add_argument(
         "--task-config",
         choices=TASK_CONFIGS,
         default="demo_randomized",
@@ -141,6 +147,13 @@ def _parse_config(args: argparse.Namespace) -> RunConfig:
     recipe_tag = f"robotwin_{args.task_name}_s{args.seed}"
     task_config = getattr(args, "task_config", "demo_randomized")
     initial_seed = int(args.seed)
+    task_language = _load_task_language(
+        args.task_language_file,
+        task_name=args.task_name,
+        task_config=task_config,
+        seed=initial_seed,
+    )
+    args._robotwin_task_language = task_language
     return RunConfig(
         recipe_tag=recipe_tag,
         output_dir=output_dir,
@@ -150,7 +163,7 @@ def _parse_config(args: argparse.Namespace) -> RunConfig:
             "initial_seed": initial_seed,
             "seed_mode": "exact",
             "task_config": task_config,
-            "instruction": "<native task_language from state_00>",
+            "instruction": task_language,
         },
         task_desc={
             "env": "robotwin",
@@ -159,13 +172,43 @@ def _parse_config(args: argparse.Namespace) -> RunConfig:
             "initial_native_seed": initial_seed,
             "seed_mode": "exact",
             "task_config": task_config,
-            "instruction": None,
+            "instruction": task_language,
+            "task_language_file": str(Path(args.task_language_file).resolve()),
             "policy_name": MODEL_SPEC.policy_name,
             "action_layout": MODEL_SPEC.action_layout,
             "env_cuda_device": env_cuda_device,
             "vla_cuda_device": vla_cuda_device,
         },
     )
+
+
+def _load_task_language(
+    source: str | None, *, task_name: str, task_config: str, seed: int
+) -> str:
+    """Load and validate the exact evaluation instruction for a task/seed."""
+    if not source:
+        raise ValueError("--task-language-file is required for RoboTwin evaluation")
+    path = Path(source).expanduser().resolve()
+    try:
+        payload = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError(f"cannot read task language file {path}: {error}") from error
+    task = payload.get(task_name)
+    if not isinstance(task, dict):
+        raise ValueError(f"task {task_name!r} is absent from {path}")
+    configured = task.get("task_config")
+    if configured != task_config:
+        raise ValueError(
+            f"task_config mismatch for {task_name}: requested={task_config!r}, "
+            f"file={configured!r}"
+        )
+    seeds = task.get("seeds", [])
+    if seed not in seeds:
+        raise ValueError(f"seed {seed} is not listed for task {task_name!r} in {path}")
+    instruction = task.get("instructions", {}).get(str(seed))
+    if not isinstance(instruction, str) or not instruction.strip():
+        raise ValueError(f"instruction for {task_name} seed {seed} is absent from {path}")
+    return instruction.strip()
 
 
 def _rpc_client(endpoint: str):
@@ -452,6 +495,8 @@ def _init_task_runtime_impl(
                 args.task_config,
                 "--seed",
                 str(initial_seed),
+                "--task-language",
+                args._robotwin_task_language,
                 "--assets-root",
                 assets_root,
                 "--transport",

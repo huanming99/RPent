@@ -170,6 +170,7 @@ def _run_dashboard_task(
                 env_name=args.env_name,
                 base_url=args.base_url,
                 model=args.model,
+                reasoning_effort=args.reasoning_effort,
                 max_tokens=args.max_tokens,
                 planner_timeout_s=args.planner_timeout_s,
                 claude_code_max_budget_usd=args.claude_code_max_budget_usd,

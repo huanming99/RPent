@@ -1,0 +1,51 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_stack_blocks_three_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "arm": "left",
+        "goal": "Use the left arm to place the red block as the center base.",
+        "name": "place_red_base",
+        "verify": "Red block is stable at the base position."
+      },
+      {
+        "arm": "right",
+        "goal": "Use the right arm to place the green block on the red block.",
+        "name": "place_green_middle",
+        "verify": "Green rests on red and the two-block stack is stable."
+      },
+      {
+        "arm": "left",
+        "goal": "Use the left arm to place the blue block on the green block.",
+        "name": "place_blue_top",
+        "verify": "Blue rests on green and the three-block stack is stable."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Red block becomes the base first.",
+      "Green is placed on red without toppling red.",
+      "Blue is placed on green while preserving the red-green stack."
+    ],
+    "roles": {
+      "manipulated_order": "red base, green middle, blue top",
+      "protected": "partial stack remains stable while next block is manipulated",
+      "target_stack": "blue on green on red at the center"
+    }
+  },
+  "task_language": "Move red block, green block, and blue block to the center using the left arm, the right arm, the left arm, and stack them with blue block on top.",
+  "task_name": "stack_blocks_three",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=1,use_length=50); 2:lingbot_act(chunks=1,use_length=50); 3:lingbot_act(chunks=1,use_length=50); 4:move_to(arm=left,gripper=open,orientation=keep); 5:lingbot_act(chunks=1,use_length=50); 6:lingbot_act(chunks=1,use_length=50); 7:move_to(arm=right,gripper=closed,orientation=keep); 8:lingbot_act(chunks=1,use_length=50); 9:move_to(arm=right,gripper=open,orientation=keep); 10:move_to(arm=right,gripper=open,orientation=keep); 11:move_to(arm=right,gripper=open,orientation=keep); 12:lingbot_act(chunks=1,use_length=50); 13:lingbot_act(chunks=1,use_length=50); 14:move_to(arm=left,gripper=closed,orientation=keep); 15:lingbot_act(chunks=1,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid reaching for blue before green is stable; verify red is the base, green is supported on red, and preserve both while placing blue."
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_place_phone_stand_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Lift the phone onto the phonestand base.",
+        "name": "place_phone_on_stand",
+        "verify": "Phone is supported by the stand base."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Phone is held before lift.",
+      "Phone rests on the phonestand base after placement."
+    ],
+    "roles": {
+      "manipulated": "phone with screen and side buttons",
+      "protected": "stand base remains stable",
+      "target_support": "flat base phonestand"
+    }
+  },
+  "task_language": "Lift the phone with screen and side buttons onto the flat base phonestand.",
+  "task_name": "place_phone_stand",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=1,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid leaving the phone short of the stand base; verify it is held during transport and fully supported by the phonestand before retreat."
+    ]
+  }
+}

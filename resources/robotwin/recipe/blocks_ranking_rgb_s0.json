@@ -1,0 +1,48 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_blocks_ranking_rgb_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Move the red block into the left rank position.",
+        "name": "place_red_left",
+        "verify": "Red block is leftmost or on a recoverable path to leftmost."
+      },
+      {
+        "goal": "Move the green block next to red without disturbing red.",
+        "name": "place_green_middle",
+        "verify": "Red remains left of green and both remain stable."
+      },
+      {
+        "goal": "Move the blue block to the right side of the red-green pair.",
+        "name": "place_blue_right",
+        "verify": "Visible order is red, green, blue from left to right."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Red is placed before green is finalized.",
+      "Green is placed while preserving red.",
+      "Blue is placed while preserving the red-green relation."
+    ],
+    "roles": {
+      "manipulated_order": "red block, then green block, then blue block",
+      "protected": "already placed blocks stay stable while the next color moves",
+      "target": "left-to-right red-green-blue ranking"
+    }
+  },
+  "task_language": "Position red block, green block, and blue block from left to right in the specified sequence.",
+  "task_name": "blocks_ranking_rgb",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=1,use_length=50); 3:lingbot_act(chunks=2,use_length=50); 4:lingbot_act(chunks=1,use_length=50); 5:lingbot_act(chunks=2,use_length=50); 6:move_to(arm=left,gripper=open,orientation=keep); 7:lingbot_act(chunks=1,use_length=50); 8:move_to(arm=left,gripper=keep,orientation=keep); 9:move_to(arm=left,gripper=keep,orientation=keep); 10:move_to(arm=left,gripper=keep,orientation=keep); 11:release(arm=left). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid transporting blue after a close alone; verify blue lifts with the gripper and preserve the red-green order before placing it to the right."
+    ]
+  }
+}

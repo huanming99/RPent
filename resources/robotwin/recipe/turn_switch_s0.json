@@ -1,0 +1,38 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100001,
+  "recipe_file": "recipe_turn_switch_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "arm": "right",
+        "goal": "Use the right arm to push or turn the trapezoid switch.",
+        "name": "engage_switch",
+        "verify": "The switch contact surface is engaged by the right TCP."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Right TCP aligns with the switch contact surface.",
+      "Push direction engages the switch instead of stopping short."
+    ],
+    "roles": {
+      "arm": "right",
+      "manipulated": "right TCP contacting switch",
+      "target": "light-colored trapezoid plastic switch"
+    }
+  },
+  "task_language": "Command the right arm to engage the light-colored trapezoid-shaped plastic switch",
+  "task_name": "turn_switch",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=1,use_length=50); 2:lingbot_act(chunks=1,use_length=50); 3:move_to(arm=right,gripper=keep,orientation=keep). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid repeating a push that stops short; relocalize the right TCP approach and verify direct contact with the trapezoid switch surface."
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_handover_mic_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Grip the microphone handle with one arm.",
+        "name": "secure_mic_handle",
+        "verify": "The handle moves with the gripper without slipping."
+      },
+      {
+        "goal": "Transfer or stabilize the microphone for the final hold.",
+        "name": "transfer_mic",
+        "verify": "The microphone remains secured after the transfer."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Grip the handle rather than the microphone head.",
+      "Transfer only when the receiving hold or stable support is visible."
+    ],
+    "roles": {
+      "manipulated": "plastic microphone handle",
+      "protected": "microphone head and handle orientation remain visible",
+      "target": "secure transferred hold"
+    }
+  },
+  "task_language": "Secure the smooth plastic microphone handle using one arm and transfer it.",
+  "task_name": "handover_mic",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=3,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid blocking the transfer path with the receiving hand; verify the microphone handle remains controlled until the receiving hold is secure."
+    ]
+  }
+}

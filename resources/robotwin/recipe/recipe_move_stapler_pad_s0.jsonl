@@ -1,0 +1,13 @@
+{"action":"lingbot_act","chunks":2,"use_length":50,"prompt":"Drop the blue stapler for paper fastening onto the Cyan mat."}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Drop the blue stapler for paper fastening onto the Cyan mat."}
+{"action":"release","arm":"left"}
+{"action":"move_to","arm":"left","xyz":[-0.2686394453048706,-0.2021004557609558,1.0650464248657228],"quat":null,"gripper":1.0,"substeps":25}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Drop the blue stapler for paper fastening onto the Cyan mat."}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Drop the blue stapler for paper fastening onto the Cyan mat."}
+{"action":"move_to","arm":"left","xyz":[-0.3169834373382172,-0.21940347714913935,0.9443327084527517],"quat":null,"gripper":0.0,"substeps":20}
+{"action":"move_to","arm":"left","xyz":[-0.3205304443836212,-0.2192756086587906,0.8844506168365478],"quat":null,"gripper":0.0,"substeps":15}
+{"action":"move_to","arm":"left","xyz":[-0.2959895367333875,-0.20038639866940025,0.8955297040709496],"quat":null,"gripper":0.0,"substeps":20}
+{"action":"release","arm":"left"}
+{"action":"move_to","arm":"left","xyz":[-0.30012398958206177,-0.2034008502960205,1.0164547514915467],"quat":null,"gripper":1.0,"substeps":20}
+{"action":"move_to","arm":"left","xyz":[-0.29436982926234684,-0.19004144786787278,0.8952903999956335],"quat":null,"gripper":0.0,"substeps":15}
+{"action":"release","arm":"left"}

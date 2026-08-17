@@ -1,0 +1,43 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_place_mouse_pad_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Grip the mouse without treating the cyan mat as active.",
+        "name": "grip_mouse",
+        "verify": "Mouse moves with or remains in contact with the gripper."
+      },
+      {
+        "goal": "Move and release the mouse onto the Cyan mat.",
+        "name": "place_mouse_on_mat",
+        "verify": "Mouse is supported on the mat and gripper is clear."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Mouse is the moved object, not the mat.",
+      "Mouse visibly leaves the table or moves with gripper before transport.",
+      "Release only when mouse is over a supportable mat region."
+    ],
+    "roles": {
+      "manipulated": "mouse with center scroll wheel",
+      "protected": "mat remains clear for support",
+      "target_support": "Cyan mat"
+    }
+  },
+  "task_language": "Grip the the mouse with scroll wheel in center and move it onto the Cyan mat.",
+  "task_name": "place_mouse_pad",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=1,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid releasing after unverified mouse contact; verify the mouse moves with the gripper and is supported on the Cyan mat before retreat."
+    ]
+  }
+}

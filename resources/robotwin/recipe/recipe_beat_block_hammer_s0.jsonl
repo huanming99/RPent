@@ -1,0 +1,4 @@
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Hold the hammer with claw-shaped end and pound the block."}
+{"action":"set_gripper","arm":"left","val":0.0,"steps":15}
+{"action":"move_to","arm":"left","xyz":[-0.008043666370213032,-0.08076708763837814,1.0],"quat":[0.522013842350489,-0.4572380157569238,0.4330947989303132,0.5752076498801646],"gripper":0.0,"substeps":12}
+{"action":"lingbot_act","chunks":1,"use_length":50,"prompt":"Hold the hammer with claw-shaped end and pound the block."}

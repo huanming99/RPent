@@ -1,0 +1,34 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_open_microwave_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "arm": "left",
+        "goal": "Use the left arm to pull the microwave door open.",
+        "name": "pull_microwave_open",
+        "verify": "Door is visibly open and the microwave body remains in place."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Left arm contacts the door/handle.",
+      "Door angle opens without dragging the appliance."
+    ],
+    "roles": {
+      "arm": "left",
+      "manipulated": "microwave door or handle",
+      "protected": "microwave body remains stable",
+      "target": "open yellow-sided microwave"
+    }
+  },
+  "task_language": "Pull open the door of the yellow-sided microwave using the left arm.",
+  "task_name": "open_microwave",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=3,use_length=50); 2:move_to(arm=left,gripper=open,orientation=keep). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates."
+}

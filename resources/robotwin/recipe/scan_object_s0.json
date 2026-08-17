@@ -1,0 +1,48 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100006,
+  "recipe_file": "recipe_scan_object_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Pick or stabilize the tea-box so it can be scanned.",
+        "name": "acquire_tea_box",
+        "verify": "Tea-box is visible and controlled or stably presented."
+      },
+      {
+        "goal": "Grip the handheld barcode scanner as the scanning tool.",
+        "name": "grasp_scanner",
+        "verify": "Scanner moves with the gripper and its scanning face is visible."
+      },
+      {
+        "goal": "Use the scanner on the tea-box.",
+        "name": "scan_tea_box",
+        "verify": "Scanner is aimed at or swept over the tea-box at close range."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Tea-box remains visible as the scanned object.",
+      "Scanner is the tool and must not be the sole active object for all phases.",
+      "Scanner face is brought to a plausible scan relation with the tea-box."
+    ],
+    "roles": {
+      "object_to_scan": "smooth black tea-box",
+      "target_relation": "scanner aimed at or swept across the tea-box code/object",
+      "tool": "lightweight handheld barcode scanner"
+    }
+  },
+  "task_language": "Pick the smooth black tea-box, grab the lightweight handheld barcode scanner, and use the scanner to scan the object.",
+  "task_name": "scan_object",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=2,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid moving only the scanner without presenting the object; verify the scanner face is aimed at or swept across the visible tea-box."
+    ]
+  }
+}

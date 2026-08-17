@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any
 
 import openai_codex
+from openai_codex.generated.v2_all import ReasoningEffort
 
 from rpent.cli.tui import next_user_line
 from rpent.dashboard.events import (
@@ -62,6 +63,7 @@ class CodexPlanner:
         extra_dirs: list[str] | None = None,
         output_path: str | Path | None = None,
         model: str | None = None,
+        reasoning_effort: str | None = None,
     ):
         """Initialize the Codex SDK backend."""
         self._output_dir = str(output_dir)
@@ -70,6 +72,7 @@ class CodexPlanner:
         self._extra_dirs = extra_dirs or []
         self._output_path = Path(output_path) if output_path else None
         self._model = model or os.environ.get("CODEX_MODEL", None)
+        effort_name = reasoning_effort or os.environ.get("CODEX_REASONING_EFFORT")
         self._base_url = os.environ.get("CODEX_BASE_URL", None)
         self._api_key = os.environ.get("CODEX_API_KEY", None)
         self._dashboard_events = dashboard_events
@@ -78,6 +81,11 @@ class CodexPlanner:
             "cwd": self._repo_root,
             "model": self._model,
             "sandbox": openai_codex.Sandbox.full_access,
+        }
+        if effort_name is not None:
+            self._turn_options["effort"] = ReasoningEffort(effort_name)
+        self._thread_options = {
+            key: value for key, value in self._turn_options.items() if key != "effort"
         }
 
     def solve(
@@ -227,7 +235,7 @@ class CodexPlanner:
             chunks: list[str] = []
             with openai_codex.Codex(config=self._build_config(mcp_url)) as codex:
                 state["codex"] = codex
-                thread = codex.thread_start(**self._turn_options)
+                thread = codex.thread_start(**self._thread_options)
                 state["thread"] = thread
 
                 with (
@@ -355,6 +363,7 @@ class CodexPlanner:
                 )
                 session = _CodexDashboardSession(
                     config=self._build_config(mcp_url),
+                    thread_options=self._thread_options,
                     options=self._turn_options,
                     recorder=recorder,
                     emit_event=emit_event,
@@ -437,12 +446,14 @@ class _CodexDashboardSession:
         self,
         *,
         config: Any,
+        thread_options: dict[str, Any],
         options: dict[str, Any],
         recorder: "_Recorder",
         emit_event,
         control: DashboardPlannerControl,
     ) -> None:
         self._config = config
+        self._thread_options = thread_options
         self._options = options
         self._recorder = recorder
         self._emit_event = emit_event
@@ -457,7 +468,7 @@ class _CodexDashboardSession:
 
     async def run(self, prompt: str) -> None:
         self._codex = openai_codex.AsyncCodex(self._config)
-        self._thread = await self._codex.thread_start(**self._options)
+        self._thread = await self._codex.thread_start(**self._thread_options)
         await self.submit(prompt)
         await self._control.start()
         await self._control.run(self)

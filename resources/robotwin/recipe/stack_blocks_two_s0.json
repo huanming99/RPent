@@ -1,0 +1,42 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_stack_blocks_two_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Place the red block at the center as the base.",
+        "name": "place_red_base",
+        "verify": "Red block is stable and reachable as support."
+      },
+      {
+        "goal": "Place the green block atop the red block.",
+        "name": "place_green_top",
+        "verify": "Green is supported on red without toppling."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Red block is the bottom support.",
+      "Green block is placed on top of red."
+    ],
+    "roles": {
+      "manipulated_order": "red block base, green block top",
+      "protected": "red base remains stable while green is placed",
+      "target_stack": "green atop red at center"
+    }
+  },
+  "task_language": "Set red block and green block at the center, stacking green block atop red block.",
+  "task_name": "stack_blocks_two",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=3,use_length=50); 3:lingbot_act(chunks=1,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid treating a closed gripper as a green-block hold; verify green lifts and keep the red base stable before placing green on top."
+    ]
+  }
+}

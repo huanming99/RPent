@@ -1,0 +1,49 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "experimental",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_beat_block_hammer_s100000.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Bind the hammer, target block, and any explicit arm from the current task language, then grip the hammer handle or stable body rather than the block.",
+        "name": "bind_and_grasp_hammer",
+        "verify": "The hammer follows the selected gripper during a small observed lift or pull check."
+      },
+      {
+        "goal": "Use the current observation to bring the held hammer head into a controlled striking relation with the requested block.",
+        "name": "align_hammer_to_block",
+        "verify": "The hammer remains securely held and its head, not the free gripper, is aligned with the visible block."
+      },
+      {
+        "goal": "Use the held hammer for a controlled strike or press, then stop once observable hammer-head contact is established.",
+        "name": "pound_block",
+        "verify": "The hammer head visibly contacts the requested block while the hammer remains the manipulated tool."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is one historical clean command sequence. In a new episode, current task language and current observations are authoritative. Its stored arm and move_to pose must not be replayed."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse historical coordinates.",
+    "critical_gates": [
+      "Bind hammer, target block, and any explicit arm from the current complete task language.",
+      "Verify the hammer moves with the selected gripper before any pounding motion.",
+      "Keep the free gripper clear; require observable hammer-head contact and do not treat block grasp or mere proximity as success."
+    ],
+    "roles": {
+      "manipulated": "the hammer named by the current task language",
+      "protected": "the requested block remains visible and reachable until tool contact",
+      "target": "the block identified by the current task language",
+      "tool": "the hammer, with its head used as the contact surface"
+    }
+  },
+  "task_language": "Hold the hammer with claw-shaped end and pound the block.",
+  "task_name": "beat_block_hammer",
+  "vla_recipe": "Historical action structure: 1:lingbot_act(chunks=1,use_length=50); 2:set_gripper(arm=left,mode=close); 3:move_to(arm=left,gripper=closed,orientation=specified); 4:lingbot_act(chunks=1,use_length=50). In a new episode, each lingbot_act must use the current episode's complete task_language exactly; the historical left-arm primitive and pose are non-replayable, and any primitive must be rederived from a verified current hammer hold.",
+  "what_failed": {
+    "notes": [
+      "Avoid grasping or pushing the block with the free gripper; dynamically bind the current arm and verify the hammer moves with it before seeking hammer-head contact."
+    ]
+  }
+}

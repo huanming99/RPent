@@ -1,0 +1,42 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_pick_diverse_bottles_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Secure one of the specified bottles with one arm.",
+        "name": "grasp_first_bottle",
+        "verify": "The first bottle moves with its gripper."
+      },
+      {
+        "goal": "Secure the other specified bottle with the other arm.",
+        "name": "grasp_second_bottle",
+        "verify": "Both bottles are visible and separately controlled."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Each bottle has a distinct gripper assignment.",
+      "Both bottles are held at the end without collision."
+    ],
+    "roles": {
+      "manipulated": "white-cap bottle and yellow-text bottle",
+      "protected": "first bottle remains held while second is acquired",
+      "target": "one bottle held by each arm"
+    }
+  },
+  "task_language": "Use one arm for the smooth plastic bottle with white cap, the other for the yellow text bottle.",
+  "task_name": "pick_diverse_bottles",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=3,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid assuming the smooth white-cap bottle is held after closure; verify each bottle moves with its assigned gripper before lifting both."
+    ]
+  }
+}

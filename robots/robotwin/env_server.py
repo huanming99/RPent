@@ -51,6 +51,7 @@ from omegaconf import OmegaConf  # noqa: E402
 from rlinf.envs.robotwin.robotwin_env import RoboTwinEnv  # noqa: E402
 from robotwin.assets import validate_root  # noqa: E402
 from robotwin.config import load_task_config  # noqa: E402
+from robotwin.envs.utils import get_face_prod  # noqa: E402
 
 _REQUIRED_ROBOTWIN_CAPABILITIES = (
     "apply_qpos_updates",
@@ -69,6 +70,26 @@ _RUNTIME_DISTRIBUTIONS = (
     "rlinf-robotwin-runtime",
     "rlinf-lingbotvla",
 )
+
+_DEFAULT_AGENT_STEP_BUDGET = 10_000
+
+
+def _initialize_native_evaluator_state(task_name: str, task: Any) -> None:
+    """Initialize checker-only baselines without invoking expert helpers.
+
+    RoboTwin's ``get_info()`` is not safe for Agent evaluation: besides
+    returning privileged scene metadata, some task implementations execute
+    their expert trajectory. Keep the minimal state needed by three native
+    success checkers private to the environment instead.
+    """
+    if task_name == "open_laptop":
+        face_prod = get_face_prod(task.laptop.get_pose().q, [1, 0, 0], [1, 0, 0])
+        task.arm_tag = "left" if face_prod > 0 else "right"
+    elif task_name == "place_object_scale":
+        task.arm_tag = "right" if task.object.get_pose().p[0] > 0 else "left"
+    elif task_name == "put_object_cabinet":
+        task.arm_tag = "right" if task.object.get_pose().p[0] > 0 else "left"
+        task.origin_z = float(task.object.get_pose().p[2])
 
 
 def _distribution_versions() -> dict[str, str]:
@@ -151,10 +172,13 @@ def _to_numpy_tree(value: Any) -> Any:
 class RoboTwinEnvFacade(RpcFacade):
     """Expose one RLinf RoboTwin environment over RPC."""
 
-    def __init__(self, env: RoboTwinEnv, *, metadata: dict[str, Any]):
+    def __init__(
+        self, env: RoboTwinEnv, *, metadata: dict[str, Any], task_language: str
+    ):
         super().__init__()
         self._env = env
         self._metadata = dict(metadata)
+        self._task_language = task_language
 
     def get_env_meta(self) -> dict[str, Any]:
         """Return immutable identity for endpoint compatibility checks."""
@@ -183,7 +207,41 @@ class RoboTwinEnvFacade(RpcFacade):
         return self._env.apply_qpos_updates(updates, env_id=0)
 
     def reset_exact(self, seed: int) -> dict[str, Any]:
-        return self._env.reset_exact(0, int(seed))
+        result = self._env.reset_exact(0, int(seed))
+        sub_env = self._env._sub_env(0)
+        with sub_env.lock:
+            status_before = self._env._native_status_unlocked(sub_env)
+            # Initialize only private state required by native success
+            # checkers. Never call get_info(): it exposes privileged metadata
+            # and some implementations execute full expert trajectories.
+            _initialize_native_evaluator_state(
+                str(self._metadata["task_name"]), sub_env.task
+            )
+            status_after = self._env._native_status_unlocked(sub_env)
+            for field in ("take_action_cnt", "policy_actions", "native_actions"):
+                if int(status_after.get(field, 0)) != int(status_before.get(field, 0)):
+                    raise RuntimeError(
+                        "native evaluator initialization mutated Agent action state: "
+                        f"field={field}, before={status_before.get(field)!r}, "
+                        f"after={status_after.get(field)!r}"
+                    )
+            if status_after.get("eval_success") is True:
+                raise RuntimeError(
+                    "native evaluator initialization produced an initially "
+                    "successful Agent episode"
+                )
+            sub_env.task.set_instruction(self._task_language)
+            sub_env.instruction = self._task_language
+            sub_env.args["instruction"] = self._task_language
+            actual = sub_env.task.get_instruction()
+        if actual != self._task_language:
+            raise RuntimeError(
+                "exact task language mismatch after reset: "
+                f"expected={self._task_language!r}, actual={actual!r}"
+            )
+        result["instruction"] = actual
+        logger.info("exact task language applied: %s", actual)
+        return result
 
     def _dispatch(self, method: str, args: tuple, kwargs: dict) -> Any:
         handlers = {
@@ -219,6 +277,8 @@ def build_env_cfg(
     native_task_config.eval_video_log = False
     native_task_config.render_freq = 0
 
+    step_limit = _DEFAULT_AGENT_STEP_BUDGET
+
     return OmegaConf.create(
         {
             "env_type": "robotwin",
@@ -232,8 +292,8 @@ def build_env_cfg(
             "seed": seed,
             "group_size": 1,
             "use_fixed_reset_state_ids": True,
-            "max_steps_per_rollout_epoch": 450,
-            "max_episode_steps": 450,
+            "max_steps_per_rollout_epoch": step_limit,
+            "max_episode_steps": step_limit,
             "is_eval": True,
             "assets_path": assets_root,
             "seeds_path": None,
@@ -291,6 +351,7 @@ def main() -> None:
         required=True,
     )
     parser.add_argument("--seed", type=int, required=True)
+    parser.add_argument("--task-language", required=True)
     parser.add_argument("--assets-root", required=True)
     parser.add_argument("--parent-watch", action="store_true")
     args = parser.parse_args()
@@ -305,6 +366,7 @@ def main() -> None:
 
     facade = RoboTwinEnvFacade(
         env,
+        task_language=args.task_language,
         metadata=env_runtime_contract(
             task_name=args.task_name,
             task_config=args.task_config,

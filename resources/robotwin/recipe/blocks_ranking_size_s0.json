@@ -1,0 +1,57 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_blocks_ranking_size_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Use exact-prompt VLA to bind the current large, medium, and small blocks, including any arm assignments stated in the current task_language.",
+        "name": "vla_bind_current_size_order",
+        "verify": "The agent is tracking the current episode's block sizes and requested arms before committing to the placement sequence."
+      },
+      {
+        "goal": "Continue exact-prompt VLA to move the largest remaining block toward the center without disturbing already useful placements.",
+        "name": "vla_place_large",
+        "verify": "The large block is moving toward the center/ranking area and remains recoverable for the next placement."
+      },
+      {
+        "goal": "Continue exact-prompt VLA for the medium block while preserving the large block relation.",
+        "name": "vla_place_medium",
+        "verify": "The medium block is brought into the large-to-small ordering relation without disturbing the large block."
+      },
+      {
+        "goal": "Continue exact-prompt VLA for the small block and final size-order alignment.",
+        "name": "vla_finish_size_order",
+        "verify": "Large, medium, and small blocks are centered and ordered by descending size; if official success is still false, identify the remaining visible blocker before choosing a short correction."
+      }
+    ],
+    "relation_to_jsonl": "The companion JSONL is a historical successful VLA-continuous trace. Transfer its phase structure and cadence as a default strategy, while deriving roles and geometry from the current episode."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all blocks and the center/ranking region from current observations; do not reuse s0 coordinates, table height, or object poses.",
+    "critical_gates": [
+      "Every VLA command must use the current episode's complete task_language exactly.",
+      "Current task language overrides stored source roles and is authoritative for arm assignment.",
+      "Preserve every correctly placed block and re-observe the large-medium-small relation after each segment.",
+      "Prefer a short exact-prompt VLA continuation while it is making meaningful progress or the learned manipulation remains recoverable.",
+      "Consider a primitive only when the intended ordering is substantially established and the remaining blocker is narrow, visible, local, and verifiable."
+    ],
+    "roles": {
+      "manipulated_order": "large, medium, and small blocks as named by the current task language",
+      "protected": "already placed size-rank relations remain stable",
+      "target": "centered large-medium-small size order"
+    }
+  },
+  "task_language": "Center large block, medium block, small block with the left arm, the right arm, and the left arm following size order.",
+  "task_name": "blocks_ranking_size",
+  "vla_recipe": "Exact sequence from the historical successful trace: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=3,use_length=50); 3:lingbot_act(chunks=3,use_length=50); 4:lingbot_act(chunks=3,use_length=50); 5:lingbot_act(chunks=3,use_length=50); 6:lingbot_act(chunks=3,use_length=50). Treat this cadence as an observation-conditioned guideline, not a fixed sequence: re-observe after each segment, preserve completed ordering relations, and prefer short VLA continuations while progress remains meaningful. For every lingbot_act, use the current episode's complete task_language exactly; relocalize every pose from current observations; current task language overrides stored source roles. A primitive is reserved for a narrow, visible, and verifiable terminal blocker after the intended size order is already substantially established.",
+  "what_failed": {
+    "notes": [
+      "Stored arm assumptions can conflict with the current task language, so bind arm roles from the current instruction.",
+      "Premature analytic intervention can break the physical continuity of a recoverable VLA manipulation; prefer another short VLA continuation while visible progress remains.",
+      "Avoid disturbing placed blocks. Before any terminal correction, verify the large-medium-small relation and isolate one narrow remaining blocker."
+    ]
+  }
+}

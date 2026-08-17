@@ -1,0 +1,48 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_put_bottles_dustbin_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Use short exact-prompt VLA chunks to place one bottle into the bin before moving to the next.",
+        "name": "place_first_bottle",
+        "verify": "The active bottle is visibly contained or stably entering the bin."
+      },
+      {
+        "goal": "Continue bottle by bottle while preserving any bottle already placed in the bin.",
+        "name": "place_remaining_bottles",
+        "verify": "Previously placed bottles remain in the bin while the next bottle is manipulated."
+      },
+      {
+        "goal": "Finish with a short exact-prompt VLA correction only if the current observation shows incomplete containment.",
+        "name": "final_containment_check",
+        "verify": "All target bottles are inside the bin at the official terminal state."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Handle one bottle at a time and re-observe after each short VLA chunk.",
+      "Verify containment before manipulating another bottle near the bin.",
+      "Do not splice in unlisted or observation-unbound analytic moves."
+    ],
+    "roles": {
+      "manipulated": "three target bottles",
+      "protected": "bottles already contained in the bin",
+      "target_receptacle": "medium black garbage container"
+    }
+  },
+  "task_language": "Drop the bottle with small ridged green cap, the cylindrical bottle, and the red and black beverage bottle into the medium black garbage container, handling them one at a time.",
+  "task_name": "put_bottles_dustbin",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=1,use_length=50); 2:lingbot_act(chunks=1,use_length=50); 3:lingbot_act(chunks=1,use_length=50); 4:lingbot_act(chunks=1,use_length=50); 5:lingbot_act(chunks=1,use_length=50); 6:lingbot_act(chunks=1,use_length=50); 7:lingbot_act(chunks=2,use_length=50); 8:lingbot_act(chunks=1,use_length=50); 9:lingbot_act(chunks=1,use_length=50); 10:lingbot_act(chunks=2,use_length=50); 11:lingbot_act(chunks=1,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "The selected success remains the pure short exact-prompt VLA attempt 001. Attempt 005 is only conditional evidence for one observation-bound lower move_to increment when geometry is collision-clear, followed by re-observation; it is not the default finisher."
+    ]
+  }
+}

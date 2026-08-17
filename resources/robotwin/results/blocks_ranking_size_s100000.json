@@ -1,0 +1,51 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_blocks_ranking_size_s100000.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "arm": "left",
+        "goal": "Use the left arm to place the large block at the first size-rank position.",
+        "name": "center_large",
+        "verify": "Large block is centered and stable."
+      },
+      {
+        "arm": "right",
+        "goal": "Use the right arm to place the medium block next in size order.",
+        "name": "center_medium",
+        "verify": "Medium block is stable and large remains placed."
+      },
+      {
+        "arm": "left",
+        "goal": "Use the left arm to place the small block while preserving the larger blocks.",
+        "name": "center_small",
+        "verify": "Large, medium, and small blocks are centered in size order."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse historical coordinates.",
+    "critical_gates": [
+      "Large block is handled by the left arm first.",
+      "Medium block is handled by the right arm after large is recoverable.",
+      "Small block is handled by the left arm after large-medium relation is stable."
+    ],
+    "roles": {
+      "manipulated_order": "large block with left arm, medium block with right arm, small block with left arm",
+      "protected": "placed size ranks remain stable",
+      "target": "centered large-medium-small size order"
+    }
+  },
+  "task_language": "Center large block, medium block, small block with the left arm, the right arm, and the left arm following size order.",
+  "task_name": "blocks_ranking_size",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=3,use_length=50); 3:lingbot_act(chunks=3,use_length=50); 4:move_to(arm=left,gripper=open,orientation=keep); 5:lingbot_act(chunks=3,use_length=50); 6:lingbot_act(chunks=3,use_length=50); 7:lingbot_act(chunks=3,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid disturbing placed blocks; verify the large-medium-small order and clear the inactive arm before each subsequent placement."
+    ]
+  }
+}

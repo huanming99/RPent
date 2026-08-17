@@ -1,0 +1,39 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_open_laptop_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "arm": "left",
+        "goal": "Use the left arm to lift the laptop lid open.",
+        "name": "raise_laptop_lid",
+        "verify": "The lid is raised and the base remains stable."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Left arm contacts the lid edge, not the base.",
+      "Lid angle increases while base stays stable."
+    ],
+    "roles": {
+      "arm": "left",
+      "manipulated": "black and silver laptop lid",
+      "protected": "laptop base remains on the table",
+      "target": "open laptop hinge angle"
+    }
+  },
+  "task_language": "Raise the black and silver laptop lid using the left arm.",
+  "task_name": "open_laptop",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=3,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid lifting above the laptop without lid contact; verify the left gripper engages the lid edge and the base stays stable as the hinge opens."
+    ]
+  }
+}

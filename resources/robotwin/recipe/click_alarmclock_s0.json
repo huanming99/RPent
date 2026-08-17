@@ -1,0 +1,33 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_click_alarmclock_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "arm": "left",
+        "goal": "Use the left arm to press the alarm-clock center button.",
+        "name": "click_center_button",
+        "verify": "The button is visibly contacted or depressed at the center."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Left arm is aligned over the center button.",
+      "Contact is on the button, not the clock body edge."
+    ],
+    "roles": {
+      "context": "smooth black alarm-clock",
+      "manipulated": "left TCP or fingertip",
+      "target": "center button"
+    }
+  },
+  "task_language": "Use the left arm to click the center button on the smooth black alarm-clock",
+  "task_name": "click_alarmclock",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates."
+}

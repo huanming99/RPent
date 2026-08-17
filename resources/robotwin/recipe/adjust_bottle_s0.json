@@ -1,0 +1,47 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100001,
+  "recipe_file": "recipe_adjust_bottle_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Secure the bottle body without pushing it away.",
+        "name": "grasp_bottle",
+        "verify": "Bottle moves with the gripper rather than sliding on the table."
+      },
+      {
+        "goal": "Rotate or lift the bottle so the red top points upward.",
+        "name": "orient_head_up",
+        "verify": "Bottle is upright enough that the red top is above the lower body."
+      },
+      {
+        "goal": "Raise the upright bottle while preserving the head-up orientation.",
+        "name": "lift_upright",
+        "verify": "Bottle remains elevated and controlled."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Bottle remains controlled during orientation.",
+      "Red top is visibly higher than the bottle base before lift completion."
+    ],
+    "roles": {
+      "manipulated": "white-neck bottle with red top",
+      "protected": "avoid sliding the bottle before grasp is secure",
+      "target": "head-up lifted bottle pose"
+    }
+  },
+  "task_language": "Position the bottle with white neck and red top head-up and lift it",
+  "task_name": "adjust_bottle",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=3,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid sliding the bottle toward an image edge; keep the gripper centered on it and verify the red top remains above the body throughout the lift."
+    ]
+  }
+}

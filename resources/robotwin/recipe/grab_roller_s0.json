@@ -1,0 +1,42 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_grab_roller_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Bring the hands to opposite stable contact points on the wooden roller.",
+        "name": "approach_roller",
+        "verify": "Roller remains visible and centered between the hands."
+      },
+      {
+        "goal": "Close or brace the hands around the roller.",
+        "name": "secure_roller",
+        "verify": "Roller moves with the hands or is visibly trapped without rolling away."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Both grippers approach the roller without pushing it away.",
+      "Roller is held or trapped stably before lifting."
+    ],
+    "roles": {
+      "manipulated": "light brown wooden roller",
+      "protected": "roller remains on a reachable path between grippers",
+      "target": "secure hold with hands"
+    }
+  },
+  "task_language": "Hold the light brown wooden roller on the table with hands.",
+  "task_name": "grab_roller",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=1,use_length=50); 3:lingbot_act(chunks=1,use_length=50); 4:move_to(arm=left,gripper=open,orientation=keep); 5:move_to(arm=right,gripper=open,orientation=keep); 6:lingbot_act(chunks=1,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid treating one-hand contact as a completed grasp; verify both hands secure the roller and relocalize it before correcting a slip."
+    ]
+  }
+}

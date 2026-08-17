@@ -1,0 +1,48 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100001,
+  "recipe_file": "recipe_dump_bin_bigbin_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Use exact-prompt VLA to grasp or control the tabletrashbin body or rim, giving VLA enough continuous time to establish a stable bin relation without spilling contents early.",
+        "name": "vla_grasp_tabletrashbin",
+        "verify": "The tabletrashbin moves with the robot and remains recoverable."
+      },
+      {
+        "goal": "Continue exact-prompt VLA from the current observed bin state to orient and pour the contents into the big bin or current task-language destination.",
+        "name": "vla_pour_contents",
+        "verify": "The balls leave the tabletrashbin toward the destination while the bin remains controlled."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance. The companion JSONL is a historical successful VLA-continuous trace; use it as evidence that this task benefits from giving exact-prompt VLA enough uninterrupted control time, not as literal replay."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse clean coordinates.",
+    "critical_gates": [
+      "The tabletrashbin is controlled before lift or tilt.",
+      "The balls are contents, not the grasp target.",
+      "The pour direction is based on current observation and destination, not a memorized pose.",
+      "If a VLA segment leaves a recoverable partial grasp, tilt, or pour state, re-observe and prefer another exact-prompt VLA continuation before changing control style.",
+      "A mid-sequence primitive can move the bin, balls, or receiving relation outside the physical continuity prepared by the previous VLA segment."
+    ],
+    "language_policy": "Stored task_language and companion JSONL prompts are historical source evidence. In any new episode, the current episode task language is authoritative; every new lingbot_act must use the complete current episode task language. Recipe text guides timing and chunk choice only; it never replaces the VLA prompt.",
+    "roles": {
+      "contents": "balls inside the tabletrashbin",
+      "destination": "big bin or current task-language pour destination",
+      "manipulated": "tabletrashbin or small waste bin",
+      "protected": "contents stay recoverable until pouring"
+    }
+  },
+  "task_language": "Pick up the smooth tabletrashbin for small waste using the arm, pour balls.",
+  "task_name": "dump_bin_bigbin",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=8,use_length=50); 2:lingbot_act(chunks=4,use_length=50). For every lingbot_act, use the current episode complete task_language from state_00.json; the stored clean prompt in the companion JSONL is historical evidence only. Relocalize from current observations and do not replay clean coordinates. Treat this as a VLA-continuous recipe: after each segment, re-observe, then usually continue with short or medium exact-prompt VLA from the current physical state. If a segment is incomplete but still shows bin contact, grasp, tilt, or pour progress, give VLA enough continuation time to recover. Consider a primitive only as final local rescue or cleanup after several VLA continuations show no visible progress and the remaining blocker is narrow, local, and verifiable.",
+  "what_failed": {
+    "notes": [
+      "Prefer continuous exact-prompt VLA for the grasp-and-pour sequence. Mid-sequence primitive intervention can leave the next VLA segment in an out-of-distribution physical state, so give VLA several observed continuation opportunities before final local rescue.",
+      "Primitive correction is best treated as cleanup for a narrow visible blocker after VLA continuity has stopped making progress, not as the main way to manipulate the bin or balls."
+    ]
+  }
+}

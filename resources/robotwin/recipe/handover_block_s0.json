@@ -1,0 +1,50 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_handover_block_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Use exact-prompt VLA to control the red block and move it toward the blue pad.",
+        "name": "vla_establish_block_control",
+        "verify": "The block visibly moves with the robot and remains above or near the target support."
+      },
+      {
+        "goal": "Continue short VLA corrections until the block is supported on the pad.",
+        "name": "vla_finish_supported_place",
+        "verify": "The block is on the blue pad and no unsupported handoff relation is assumed unless language requires it."
+      },
+      {
+        "goal": "If the block is supported but the gripper remains closed, release only enough to clear it.",
+        "name": "minimal_final_release",
+        "verify": "The block stays on the pad after release and the gripper is clear."
+      }
+    ],
+    "relation_to_jsonl": "The phases are transferable guidance; the companion JSONL is one exact historical successful command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize from current observations; never replay clean coordinates from the companion trace.",
+    "critical_gates": [
+      "The block visibly moves with the robot and remains above or near the target support.",
+      "The block is on the blue pad and no unsupported handoff relation is assumed unless language requires it.",
+      "The block stays on the pad after release and the gripper is clear."
+    ],
+    "language_policy": "Stored task_language is the historical clean source language. In new evaluation, the current episode task_language is authoritative; every new lingbot_act must use that complete current language rather than the clean prompt saved in JSONL.",
+    "roles": {
+      "manipulated": "red block",
+      "protected": "pad support relation after placement",
+      "target_support": "blue pad"
+    }
+  },
+  "task_language": "Set the red block on the blue pad gently.",
+  "task_name": "handover_block",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=3,use_length=50); 2:lingbot_act(chunks=1,use_length=50); 3:lingbot_act(chunks=1,use_length=50); 4:release(arm=right). For every lingbot_act, use the current episode complete task_language; the stored clean prompt in the companion JSONL is historical evidence only. Relocalize from current observations and do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Do not invent a bimanual handoff when the current language only requires placing on the pad.",
+      "Extra release is useful only if the block is already supported and the gripper remains closed."
+    ]
+  }
+}

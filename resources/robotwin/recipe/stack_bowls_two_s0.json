@@ -1,0 +1,37 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_stack_bowls_two_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Position the glazed bowl as the bottom support.",
+        "name": "set_bottom_bowl",
+        "verify": "Bottom bowl is upright and stable."
+      },
+      {
+        "goal": "Place the shiny bowl over the bottom bowl.",
+        "name": "place_shiny_bowl_top",
+        "verify": "Top bowl is supported by the bottom bowl."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Bottom bowl is stable before top placement.",
+      "Shiny bowl is the later top bowl."
+    ],
+    "roles": {
+      "manipulated_order": "glazed bowl bottom, shiny bowl top",
+      "protected": "bottom bowl remains upright",
+      "target_stack": "shiny bowl over the bottom bowl"
+    }
+  },
+  "task_language": "Pick the glazed bowl with curved sides, position on the table, and place the bowl with shiny texture over it.",
+  "task_name": "stack_bowls_two",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=3,use_length=50); 2:lingbot_act(chunks=3,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates."
+}

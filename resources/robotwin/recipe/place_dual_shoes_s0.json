@@ -1,0 +1,49 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_place_dual_shoes_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Move one white shoe into the orange box.",
+        "name": "place_first_shoe",
+        "verify": "First shoe is inside the box."
+      },
+      {
+        "goal": "Move the second shoe into the box with tips left-aligned.",
+        "name": "place_second_shoe",
+        "verify": "Both shoes are inside the box with aligned tips."
+      },
+      {
+        "goal": "Retreat without disturbing either shoe.",
+        "name": "retreat_clear",
+        "verify": "Both shoes remain inside the orange box."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "First shoe remains inside the box.",
+      "Second shoe is placed without disturbing the first.",
+      "Tips are left-aligned before final retreat."
+    ],
+    "roles": {
+      "manipulated": "two white shoes",
+      "protected": "first shoe remains inside while second is placed",
+      "target_orientation": "shoe tips left-aligned",
+      "target_support": "bright orange box"
+    }
+  },
+  "task_language": "Transfer two the white shoe with rounded toe, tips left-aligned, into the smooth bright orange box.",
+  "task_name": "place_dual_shoes",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=3,use_length=50); 3:move_to(arm=right,gripper=open,orientation=keep). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid correcting the shoe already inside the box; relocalize the outside shoe and verify both shoes remain contained with their tips left-aligned."
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_place_cans_plasticbox_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Identify the named cans and the plasticbox from the current episode language and view.",
+        "name": "bind_can_and_box_roles",
+        "verify": "Both cans and the target box remain visible or reliably localized."
+      },
+      {
+        "goal": "Use exact-prompt VLA chunks to handle contact-rich grasping and placement into the box.",
+        "name": "continuous_vla_container_place",
+        "verify": "After the first chunk, decide from observation whether containment is complete or a continuation is needed."
+      },
+      {
+        "goal": "Stop as soon as both cans are inside the plasticbox and released.",
+        "name": "terminal_containment_check",
+        "verify": "Both cans are supported by the box and both grippers are clear."
+      }
+    ],
+    "relation_to_jsonl": "The phases are transferable guidance; the companion JSONL is one exact historical successful command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize from current observations; never replay clean coordinates from the companion trace.",
+    "critical_gates": [
+      "Both cans and the target box remain visible or reliably localized.",
+      "After the first chunk, decide from observation whether containment is complete or a continuation is needed.",
+      "Both cans are supported by the box and both grippers are clear."
+    ],
+    "language_policy": "Stored task_language is the historical clean source language. In new evaluation, the current episode task_language is authoritative; every new lingbot_act must use that complete current language rather than the clean prompt saved in JSONL.",
+    "roles": {
+      "manipulated": "two named cans",
+      "protected": "first can once contained",
+      "target_container": "light blue plasticbox"
+    }
+  },
+  "task_language": "Move the red can with white Coca-Cola logo and the beverage can with red green graphics one at a time into the boxy light blue plasticbox.",
+  "task_name": "place_cans_plasticbox",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=3,use_length=50). For every lingbot_act, use the current episode complete task_language; the stored clean prompt in the companion JSONL is historical evidence only. Relocalize from current observations and do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Protect any can already contained in the box before recovering the other can.",
+      "If both cans are held after the first VLA chunk, prefer short exact-prompt continuation over blind analytic transport."
+    ]
+  }
+}

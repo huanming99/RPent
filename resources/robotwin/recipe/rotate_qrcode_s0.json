@@ -1,0 +1,38 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_rotate_qrcode_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Bind the requested QR-code stand and arm from the current task language, then establish a stable grasp.",
+        "name": "bind_and_grasp_qr_stand",
+        "verify": "The requested stand visibly follows the selected gripper without being confused with another object."
+      },
+      {
+        "goal": "Rotate the QR face to the requested front-facing relation, return the stand to stable table support, release, and clear the grippers.",
+        "name": "orient_release_and_verify",
+        "verify": "The QR face is visibly front-facing, the stand is stably supported, and both grippers are open and clear."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is one historical clean command sequence. In a new episode, current task language and current observations are authoritative."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Resolve the requested stand and any explicit arm assignment from the current complete task language.",
+      "Verify the stand moves with the gripper before applying rotation.",
+      "Judge the QR face from the current observation, then verify stable support and both grippers clear after release."
+    ],
+    "roles": {
+      "manipulated": "the QR-code stand named by the current task language",
+      "protected": "the stand remains controlled during rotation and supported after release",
+      "target_orientation": "the QR face visibly matches the requested front-facing relation"
+    }
+  },
+  "task_language": "Grab the triangular stand with QR code, lift it from the table, and rotate it QR front",
+  "task_name": "rotate_qrcode",
+  "vla_recipe": "Historical action structure: 1:lingbot_act(chunks=1,use_length=50); 2:lingbot_act(chunks=1,use_length=50); 3:lingbot_act(chunks=1,use_length=50). In every new episode, each lingbot_act must use the current episode's complete task_language exactly; re-observe orientation and support after each chunk; do not replay historical object bindings or poses."
+}

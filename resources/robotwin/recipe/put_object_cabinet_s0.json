@@ -1,0 +1,38 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100019,
+  "recipe_file": "recipe_put_object_cabinet_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Slide open the cabinet drawer.",
+        "name": "open_drawer",
+        "verify": "Drawer opening is visible and accessible."
+      },
+      {
+        "goal": "Move the hand-sized soap into the open drawer.",
+        "name": "place_soap_in_drawer",
+        "verify": "Soap rests inside the drawer."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Drawer is opened before soap placement.",
+      "Soap is the object placed into the drawer.",
+      "Drawer opening remains clear enough for insertion."
+    ],
+    "roles": {
+      "manipulated_order": "cabinet drawer first, then hand-sized soap",
+      "protected": "drawer remains open while soap is inserted",
+      "target_support": "opened drawer interior"
+    }
+  },
+  "task_language": "Slide open the drawer of the cabinet with metal reinforcements and set the hand-sized soap into it.",
+  "task_name": "put_object_cabinet",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=3,use_length=50); 2:lingbot_act(chunks=3,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates."
+}

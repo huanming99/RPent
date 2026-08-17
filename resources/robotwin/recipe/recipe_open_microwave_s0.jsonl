@@ -1,0 +1,2 @@
+{"action":"lingbot_act","chunks":3,"use_length":50,"prompt":"Pull open the door of the yellow-sided microwave using the left arm."}
+{"action":"move_to","arm":"left","xyz":[0.04,-0.03,0.965],"quat":null,"gripper":1,"substeps":25}

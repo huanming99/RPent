@@ -1,0 +1,37 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_place_object_stand_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Put the dark gray mouse on the displaystand.",
+        "name": "place_mouse_on_stand",
+        "verify": "Mouse rests on the angled stand and gripper is clear."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Mouse is controlled before placement.",
+      "Mouse is supported by the angled stand before release."
+    ],
+    "roles": {
+      "manipulated": "dark gray palm-sized mouse",
+      "protected": "stand remains stable",
+      "target_support": "angled black displaystand"
+    }
+  },
+  "task_language": "Grab and put the dark gray palm-sized mouse on the angled black displaystand",
+  "task_name": "place_object_stand",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:release(arm=right). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid trusting an occluded mouse placement; verify the mouse moves with the gripper and is supported on the angled displaystand before retreat."
+    ]
+  }
+}

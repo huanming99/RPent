@@ -8,10 +8,7 @@ CELL = """- task: {{task_name}}
 - checkpoint: RLinf/LingBot-VLA-RoboTwin-EEF-ckpt1500
 """
 
-BEGIN = """Before acting, read memory/MEMORY.md if present, choose only the
-memory notes relevant to {{task_name}}, then list results and read a successful
-{{task_name}} summary and its recipe if available. These files are technique
-priors only: never reuse their coordinates. Next inspect view_env_state(step=0)
-and the returned images, re-localize the current scene, and use only registered
-RoboTwin tools to act. Copy the complete current task_language for every
-lingbot_act. The native success predicate and action budget are authoritative."""
+BEGIN = """Follow the required read order, bind the current task's targets and
+relations from fresh observation, then execute the first unmet recipe phase.
+After each action verify its observable gate, preserve achieved relations, and
+use the complete current task_language unchanged for every lingbot_act."""

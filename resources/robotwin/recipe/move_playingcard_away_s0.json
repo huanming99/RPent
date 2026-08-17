@@ -1,0 +1,32 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_move_playingcard_away_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Grasp the cards container and move it further outward.",
+        "name": "move_cards_outward",
+        "verify": "Container is visibly farther outward and stable."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Container is controlled before outward motion.",
+      "Move increases outward separation from the starting area."
+    ],
+    "roles": {
+      "manipulated": "smooth black cards container",
+      "protected": "container stays graspable until moved outward",
+      "target": "further outward position"
+    }
+  },
+  "task_language": "Grab the smooth black cards container and move it further outward.",
+  "task_name": "move_playingcard_away",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=1,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates."
+}

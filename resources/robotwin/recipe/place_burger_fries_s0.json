@@ -1,0 +1,42 @@
+{
+  "eval_success": true,
+  "eval_success_scope": "source_recipe_trajectory",
+  "evidence_status": "supported",
+  "exact_seed": 100000,
+  "recipe_file": "recipe_place_burger_fries_s0.jsonl",
+  "semantic_recipe": {
+    "phases": [
+      {
+        "goal": "Move the hamburg to the serving tray.",
+        "name": "place_hamburg_on_tray",
+        "verify": "Hamburg is supported on the tray."
+      },
+      {
+        "goal": "Move the fries pouch to the tray while preserving the hamburg.",
+        "name": "place_fries_on_tray",
+        "verify": "Both hamburg and fries are on the tray."
+      }
+    ],
+    "relation_to_jsonl": "Phases are transferable task guidance; the companion JSONL is the exact historical winning command sequence."
+  },
+  "strategy_notes": {
+    "coordinate_policy": "Relocalize all objects, supports, contacts, and poses from current observations; do not reuse s0 coordinates.",
+    "critical_gates": [
+      "Hamburg and fries are both target items.",
+      "Tray support remains clear enough for both items."
+    ],
+    "roles": {
+      "manipulated": "hamburg and fries pouch",
+      "protected": "first served item stays on tray while the second moves",
+      "target_support": "serving tray"
+    }
+  },
+  "task_language": "Move the soft hamburg with smooth wrapper and the crispy fries in hand-sized pouch to the tray for serving items using both arms.",
+  "task_name": "place_burger_fries",
+  "vla_recipe": "Exact sequence: 1:lingbot_act(chunks=2,use_length=50); 2:lingbot_act(chunks=3,use_length=50). For every lingbot_act, use the original task_language exactly; relocalize every pose from current observations; do not replay clean coordinates.",
+  "what_failed": {
+    "notes": [
+      "Avoid leaving the hamburg beside the tray; verify each food item is supported on the tray and preserve the first item while placing the second."
+    ]
+  }
+}
