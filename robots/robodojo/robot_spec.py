@@ -64,8 +64,8 @@ ROBODOJO_DASHBOARD_SPEC: DashboardSpec = {
     },
     "runtime_components": (
         {"name": "env", "label": "ENV", "scope": "unique"},
-        {"name": "vla", "label": "VLA", "scope": "shared"},
         {"name": "sam3", "label": "SAM3", "scope": "shared"},
+        {"name": "vla", "label": "VPP2", "scope": "shared"},
     ),
     "frame_channels": (
         {
@@ -88,11 +88,14 @@ ROBODOJO_DASHBOARD_SPEC: DashboardSpec = {
         "view_env_state",
         "back_project",
         "segment",
+        "render",
+        "sample_world_xyz",
+        "query_world_map",
         "move_to",
+        "rotate_wrist",
         "set_gripper",
-        "pi0_pick",
-        "stabilize",
-        "place_in_bin",
+        "release",
+        "vpp2_act",
     ),
 }
 
@@ -142,8 +145,9 @@ def get_robot_spec() -> RobotSpec:
         parse_config=_parse_config,
         init_runtime=_init_runtime,
         dashboard=ROBODOJO_DASHBOARD_SPEC,
-        run_flash=_run_flash,
+        validate_args=_validate_args,
         finalize_run=finalize_run,
+        supports_exploration=True,
     )
 
 
@@ -152,6 +156,7 @@ def finalize_run(context: RunFinalizationContext) -> Path:
     record = {
         "task": context.task_desc["task"],
         "layout": context.task_desc["layout"],
+        "seed": context.task_desc.get("seed", 0),
         "mode": context.task_desc.get("mode", "dev"),
         "success": context.environment_success,
         "environment_result_available": context.environment_success is not None,
@@ -168,10 +173,17 @@ def finalize_run(context: RunFinalizationContext) -> Path:
     return write_json_atomic(context.output_dir / "result.json", record)
 
 
-def _run_flash(toolkit, cell_tag: str, note) -> dict:
-    from robots.robodojo.flash.replay import run_flash
-
-    return run_flash(toolkit, cell_tag, note)
+def _validate_args(args: argparse.Namespace) -> None:
+    """Reject unsupported replay and changing-scene exploration before startup."""
+    if getattr(args, "planner", None) == "flash":
+        raise ValueError(
+            "RoboDojo legacy Flash replay is unavailable with the new motion tools"
+        )
+    if getattr(args, "explore", False) and getattr(args, "random", False):
+        raise ValueError("exploration requires a fixed seed/layout; omit --random")
+    for name in ("seed", "layout", "explore_attempts_per_session"):
+        if getattr(args, name, 0) < 0:
+            raise ValueError(f"{name} must be nonnegative")
 
 
 def get_toolkit(
@@ -179,12 +191,17 @@ def get_toolkit(
     runtime_kwargs: dict[str, Any],
     dashboard_events: DashboardEventSink,
     config: RunConfig,
+    mode: str = "evaluation",
+    attempts_per_session: int = 5,
+    state_output_dir: Path | str | None = None,
 ):
     """Return the RoboDojo toolkit (common tools + RoboDojo primitives)."""
     from robots.robodojo.toolkit import RoboDojoToolkit
 
     memory = MemoryManager(
         root=config.prompt_vars.get("memory_dir") or get_memory_dir("robodojo"),
+        memory_access="inbox_write" if mode == "exploration" else "read_only",
+        inbox_cell_tag=config.recipe_tag if mode == "exploration" else None,
     )
     if config.prompt_vars.get("mode") == "eval-fair":
         from robots.robodojo.flash.replay import load_plan
@@ -195,6 +212,9 @@ def get_toolkit(
         dashboard_events=dashboard_events,
         memory=memory,
         eval_fair=config.prompt_vars.get("mode") == "eval-fair",
+        mode=mode,
+        attempts_per_session=attempts_per_session,
+        state_output_dir=state_output_dir,
     )
 
 
@@ -219,12 +239,12 @@ def _add_cli_args(parser: argparse.ArgumentParser, use_dashboard: bool) -> None:
         "--policy-backend",
         choices=["rlinf", "xpolicylab"],
         default="rlinf",
-        help="Pi0.5 policy backend (default: rlinf)",
+        help="Legacy Pi0.5 backend for explicit VLA diagnostics; not started by default",
     )
     parser.add_argument(
         "--pi05-python",
         default=sys.executable,
-        help="Python executable with Pi_05 dependencies installed",
+        help="Python executable for explicit legacy Pi0.5 diagnostics",
     )
     parser.add_argument(
         "--task",
@@ -232,7 +252,28 @@ def _add_cli_args(parser: argparse.ArgumentParser, use_dashboard: bool) -> None:
         required=required,
         help="RoboDojo task name, e.g. put_bottles_into_dustbin",
     )
-    parser.add_argument("--layout", type=int, default=0, help="Layout id (== env seed)")
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=0,
+        help="Official layout group (Eval_Layout seed directory)",
+    )
+    parser.add_argument(
+        "--layout",
+        type=int,
+        default=0,
+        help="Layout index within the selected seed group",
+    )
+    parser.add_argument(
+        "--explore-attempts-per-session",
+        type=int,
+        default=5,
+        help="Exploration attempts including the initial episode; 0 disables this limit",
+    )
+    parser.add_argument("--explore-sessions", type=int, default=3)
+    parser.add_argument(
+        "--auto-merge-memory", action=argparse.BooleanOptionalAction, default=True
+    )
     parser.add_argument(
         "--env-cfg-type", default=DEFAULT_ENV_CFG, help="RoboDojo env config (arx_x5)"
     )
@@ -240,7 +281,7 @@ def _add_cli_args(parser: argparse.ArgumentParser, use_dashboard: bool) -> None:
         "--action-type",
         choices=["joint", "ee"],
         default="joint",
-        help="Policy action representation for VLA primitives",
+        help="Legacy policy action representation; scripted primitives use joint targets",
     )
     parser.add_argument("--max-episode-steps", type=int, default=700)
     parser.add_argument(
@@ -260,9 +301,14 @@ def _add_cli_args(parser: argparse.ArgumentParser, use_dashboard: bool) -> None:
         help="[protocol://]host:port of an existing env_server",
     )
     parser.add_argument(
+        "--vla-model-path",
+        default=os.environ.get("VPP2_MODEL_PATH"),
+        help="VPP2 resource root containing policy/ and checkpoints/ (or VPP2_MODEL_PATH)",
+    )
+    parser.add_argument(
         "--vla-endpoint",
         default=None,
-        help="[protocol://]host:port of an existing Pi_05 policy server",
+        help="socket://host:port of an existing VPP2 server",
     )
     parser.add_argument(
         "--sam3-endpoint",
@@ -280,7 +326,9 @@ def _parse_config(args: argparse.Namespace) -> RunConfig:
         raise ValueError(err)
     eval_fair = getattr(args, "planner", None) == "flash"
     summary = {} if eval_fair else robodojo_tasks.task_summary(args.task, source_root)
-    recipe_tag = f"{args.task}_l{args.layout}"
+    seed = getattr(args, "seed", 0)
+    explore = bool(getattr(args, "explore", False))
+    recipe_tag = f"{args.task}_s{seed}_l{args.layout}"
     if getattr(args, "random", False):
         recipe_tag = f"{args.task}_random"
     memory_arg = getattr(args, "memory_dir", None)
@@ -292,25 +340,39 @@ def _parse_config(args: argparse.Namespace) -> RunConfig:
     output_dir = args.output_dir
     if output_dir is None:
         ts = datetime.now().strftime("%Y%m%d-%H:%M:%S")
-        output_dir = (
-            get_repo_root() / "logs" / f"{ts}_robodojo_{args.task}_l{args.layout}"
-        )
+        output_dir = get_repo_root() / "logs" / f"{ts}_robodojo_{recipe_tag}"
     return RunConfig(
         recipe_tag=recipe_tag,
         output_dir=Path(output_dir),
         prompt_vars={
             "task": args.task,
             "layout": args.layout,
+            "seed": seed,
             "env_cfg_type": args.env_cfg_type,
             "action_type": args.action_type,
             "recipe_tag": recipe_tag,
             "task_summary": summary,
             "memory_dir": str(memory_dir),
-            "mode": "eval-fair" if eval_fair else "dev",
+            "mode": "explore" if explore else "eval-fair" if eval_fair else "dev",
+            **(
+                {
+                    "memory_inbox": str(
+                        memory_dir / "_internal" / "inbox" / recipe_tag
+                    ),
+                    "session_number": 1,
+                    "session_max": getattr(args, "explore_sessions", 3),
+                    "explore_attempts_per_session": getattr(
+                        args, "explore_attempts_per_session", 5
+                    ),
+                }
+                if explore
+                else {}
+            ),
         },
         task_desc={
             "task": args.task,
             "layout": args.layout,
+            "seed": seed,
             **({"mode": "eval-fair"} if eval_fair else {}),
         },
     )
@@ -346,6 +408,8 @@ def _spawn_env_server(
             args.task,
             "--layout",
             str(args.layout),
+            "--seed",
+            str(getattr(args, "seed", 0)),
             "--env-cfg-type",
             args.env_cfg_type,
             "--num-envs",
@@ -474,21 +538,57 @@ def _spawn_vla_server(
     return daemon, HttpRpcClient(f"http://{host}:{port}")
 
 
+def _spawn_vpp2_server(
+    args: argparse.Namespace, output_dir: Path
+) -> tuple["ProcessDaemon | None", RpcClient]:
+    """Start VPP2 in this interpreter, or borrow a separately managed service."""
+    if args.vla_endpoint is not None:
+        return None, make_rpc_client(args.vla_endpoint)
+    from robots.robodojo.vpp2_server import model_paths
+
+    model_paths(args.vla_model_path)
+    host, port = "127.0.0.1", pick_free_port()
+    daemon = ProcessDaemon(
+        name="robodojo_vpp2_server",
+        cmd=[
+            sys.executable,
+            "-u",
+            "-m",
+            "robots.robodojo.vpp2_server",
+            "--model-path",
+            str(Path(args.vla_model_path).expanduser().resolve()),
+            "--host",
+            host,
+            "--port",
+            str(port),
+            "--parent-watch",
+        ],
+        env_overrides=(
+            {"CUDA_VISIBLE_DEVICES": str(args.cuda_device)}
+            if args.cuda_device is not None
+            else {}
+        ),
+        log_path=str(Path(output_dir) / "robodojo_vpp2_server.log"),
+    )
+    daemon.start()
+    return daemon, make_rpc_client(f"socket://{host}:{port}")
+
+
 def _init_runtime(
     args: argparse.Namespace,
     output_dir: Path,
     dashboard_events: DashboardEventSink,
     components: set[str] | None,
 ) -> tuple[list[ProcessDaemon], dict[str, Any]]:
-    """Initialize every RoboDojo component, or only ``components`` when given."""
+    """Start Env, SAM3 and VPP2, or only the requested Dashboard components."""
+    _validate_args(args)
     from robots.robodojo.env_client import RoboDojoEnvClient
-    from rpent.robots.components.pi05_vla_client import Pi05VLAClient
+    from robots.robodojo.vpp2_client import VPP2Client
     from rpent.robots.components.sam3_client import Sam3Client
-    from rpent.robots.components.xpolicylab_vla_client import XPolicyLabVLAClient
 
     starters = {
         "env": lambda: _spawn_env_server(args, output_dir),
-        "vla": lambda: _spawn_vla_server(args, output_dir),
+        "vla": lambda: _spawn_vpp2_server(args, output_dir),
         "sam3": lambda: _spawn_sam3_server(args, output_dir),
     }
     connectors = {
@@ -498,6 +598,7 @@ def _init_runtime(
                 expected_meta={
                     "task": args.task,
                     "layout": args.layout,
+                    "seed": getattr(args, "seed", 0),
                     "env_cfg_type": args.env_cfg_type,
                     "device_id": args.cuda_device
                     if args.cuda_device is not None
@@ -513,21 +614,19 @@ def _init_runtime(
                 },
             )
         },
-        "vla": lambda rpc: {
-            "vla_client": (
-                Pi05VLAClient(rpc, embodiment="robodojo")
-                if args.policy_backend == "rlinf"
-                else XPolicyLabVLAClient(rpc)
-            )
-        },
+        "vla": lambda rpc: {"vla_client": VPP2Client(rpc)},
         "sam3": lambda rpc: {"sam3_client": Sam3Client(rpc)},
     }
     timeouts = {"env": 900.0, "sam3": 300.0, "vla": 1800.0}
     wait_order = ("env", "sam3", "vla")
-    selected = set(starters) if components is None else set(components)
+    selected = {"env", "sam3", "vla"} if components is None else set(components)
     unknown = selected.difference(starters)
     if unknown:
         raise ValueError(f"unknown RoboDojo runtime components: {sorted(unknown)}")
+    if "vla" in selected and args.vla_endpoint is None:
+        from robots.robodojo.vpp2_server import model_paths
+
+        model_paths(args.vla_model_path)
 
     pending: dict[str, tuple[ProcessDaemon | None, RpcClient]] = {}
     owned_daemons: dict[str, ProcessDaemon] = {}
